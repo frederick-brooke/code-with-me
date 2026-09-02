@@ -67,6 +67,7 @@ export interface DataStore {
 
   createSession(session: Session): Promise<Session>;
   findSessionById(id: string): Promise<Session | null>;
+  updateSession(session: Session): Promise<Session>;
   listSessionsByCandidate(candidateId: string): Promise<Session[]>;
 
   createRun(run: Run): Promise<Run>;

@@ -62,6 +62,11 @@ export class InMemoryDataStore implements DataStore {
     return this.sessions.get(id) ?? null;
   }
 
+  async updateSession(session: Session): Promise<Session> {
+    this.sessions.set(session.id, session);
+    return session;
+  }
+
   async listSessionsByCandidate(candidateId: string): Promise<Session[]> {
     return [...this.sessions.values()].filter(
       (session) => session.candidateId === candidateId,

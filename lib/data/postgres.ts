@@ -199,6 +199,18 @@ export class PostgresDataStore implements DataStore {
     return row ? toSession(row) : null;
   }
 
+  async updateSession(session: Session): Promise<Session> {
+    const row = await this.db.session.update({
+      where: { id: session.id },
+      data: {
+        phase: PHASE_TO_PRISMA[session.phase],
+        startedAt: session.startedAt,
+        endedAt: session.endedAt,
+      },
+    });
+    return toSession(row);
+  }
+
   async listSessionsByCandidate(candidateId: string): Promise<Session[]> {
     const rows = await this.db.session.findMany({
       where: { candidateId },

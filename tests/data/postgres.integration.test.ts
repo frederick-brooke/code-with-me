@@ -3,6 +3,7 @@ import { execFileSync } from "node:child_process";
 import { prisma } from "@/lib/db/prisma";
 import { PostgresDataStore, seedPostgresProblems } from "@/lib/data/postgres";
 import { seedProblems } from "@/lib/data/seeds/problems";
+import { SessionEngine } from "@/lib/engine/session-engine";
 import type {
   Message,
   PerformanceSummary,
@@ -204,5 +205,28 @@ describe.skipIf(!DATABASE_URL)("PostgresDataStore (integration)", () => {
       "What went well: …",
     );
     await expect(store.createPerformanceSummary(makeSummary({ id: "summary-2" }))).rejects.toThrow();
+  });
+
+  it("drives a full SessionEngine lifecycle against Postgres", async () => {
+    await seedPostgresProblems();
+    const candidate = await store.createCandidate("candidate@example.com");
+    const engine = new SessionEngine(new PostgresDataStore());
+
+    const started = await engine.start("session-1", candidate.id, "two-sum");
+    expect(started.phase).toBe("introduction");
+
+    await engine.recordRun("session-1", { code: "print(1)", passedCount: 1, failedCount: 0 });
+    await engine.recordMessage("session-1", { speaker: "candidate", text: "Done." });
+    const advanced = await engine.advance("session-1");
+    expect(advanced.phase).toBe("solve");
+    const ended = await engine.end("session-1");
+    expect(ended.phase).toBe("debrief");
+    expect(ended.endedAt).toBeInstanceOf(Date);
+
+    const query = await engine.query("session-1");
+    expect(query.currentCode).toBe("print(1)");
+    expect(query.passedCount).toBe(1);
+    expect(query.failedCount).toBe(0);
+    expect(query.transcript).toEqual([{ speaker: "candidate", text: "Done." }]);
   });
 });
