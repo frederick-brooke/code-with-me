@@ -5,6 +5,7 @@ export class InMemoryAuthStore implements AuthStore {
   private candidates = new Map<string, Candidate>();
   private pendingCodes = new Map<string, PendingCode>();
   private sessions = new Map<string, AuthSession>();
+  private codeRequests = new Map<string, Date[]>();
 
   findCandidateById(id: string): Candidate | null {
     return this.candidates.get(id) ?? null;
@@ -39,6 +40,15 @@ export class InMemoryAuthStore implements AuthStore {
 
   deletePendingCode(email: string): void {
     this.pendingCodes.delete(email);
+  }
+
+  recordCodeRequest(email: string, timestamp: Date): void {
+    const existing = this.codeRequests.get(email) ?? [];
+    this.codeRequests.set(email, [...existing, timestamp]);
+  }
+
+  findCodeRequests(email: string): Date[] {
+    return this.codeRequests.get(email) ?? [];
   }
 
   createSession(session: AuthSession): void {

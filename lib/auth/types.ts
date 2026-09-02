@@ -24,12 +24,14 @@ export interface AuthStore {
   savePendingCode(pending: PendingCode): void;
   findPendingCode(email: string): PendingCode | null;
   deletePendingCode(email: string): void;
+  recordCodeRequest(email: string, timestamp: Date): void;
+  findCodeRequests(email: string): Date[];
   createSession(session: AuthSession): void;
   findSession(token: string): AuthSession | null;
   deleteSession(token: string): void;
 }
 
-export type RequestCodeError = "invalid-email";
+export type RequestCodeError = "invalid-email" | "cooldown-active" | "rate-limited";
 
 export type RequestCodeResult =
   | { ok: true; email: string; code: string }
@@ -50,4 +52,6 @@ export interface AuthEngineOptions {
   codeTtlMs?: number;
   sessionTtlMs?: number;
   maxAttempts?: number;
+  cooldownMs?: number;
+  maxPerHour?: number;
 }

@@ -8,6 +8,10 @@ A mock live-coding interview app where a candidate prepares for a technical codi
 The human using the app to prepare. The only human user; there is no human assessor for the MVP. Identified by a lightweight email account so Session Records follow them across devices.
 _Avoid_: User, Interviewee, guest
 
+**One-time code**:
+The 6-digit secret that proves a Candidate's control of an email address. A login request issues one and it is delivered to that address. A magic link is not a second artifact — it is the same One-time code delivered as a clickable URL that auto-verifies on arrival. A code is single-use, expires shortly, tolerates only a few wrong attempts before it is invalidated, and a mailbox may request only a limited number of codes per hour.
+_Avoid_: Password, OTP, magic-link-as-a-thing, verification token
+
 **Assessor**:
 The AI voice agent that runs the interview: introduces the Problem, answers questions, guides the Candidate without giving the answer away. Implemented as a managed turn-based voice caller (ElevenLabs Voice Agent) — STT, the agent reasoning, turn detection, interruption handling, and TTS all run inside that managed pipeline; the app supplies context and receives events.
 _Avoid_: Interviewer, coach

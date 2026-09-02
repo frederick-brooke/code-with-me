@@ -11,6 +11,9 @@ const CODE_LENGTH = 6;
 export const DEFAULT_CODE_TTL_MS = 15 * 60 * 1000;
 export const DEFAULT_SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 export const DEFAULT_MAX_ATTEMPTS = 5;
+export const DEFAULT_COOLDOWN_MS = 60 * 1000;
+export const DEFAULT_MAX_PER_HOUR = 5;
+export const DEFAULT_MAX_PER_HOUR_WINDOW_MS = 60 * 60 * 1000;
 const TOKEN_BYTES = 32;
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -40,6 +43,8 @@ export class AuthEngine {
   private readonly codeTtlMs: number;
   private readonly sessionTtlMs: number;
   private readonly maxAttempts: number;
+  private readonly cooldownMs: number;
+  private readonly maxPerHour: number;
 
   constructor(
     private readonly store: AuthStore,
@@ -49,6 +54,8 @@ export class AuthEngine {
     this.codeTtlMs = options.codeTtlMs ?? DEFAULT_CODE_TTL_MS;
     this.sessionTtlMs = options.sessionTtlMs ?? DEFAULT_SESSION_TTL_MS;
     this.maxAttempts = options.maxAttempts ?? DEFAULT_MAX_ATTEMPTS;
+    this.cooldownMs = options.cooldownMs ?? DEFAULT_COOLDOWN_MS;
+    this.maxPerHour = options.maxPerHour ?? DEFAULT_MAX_PER_HOUR;
   }
 
   async requestCode(rawEmail: string): Promise<RequestCodeResult> {
@@ -57,14 +64,24 @@ export class AuthEngine {
       return { ok: false, error: "invalid-email" };
     }
 
+    const now = this.now().getTime();
+    const requests = this.store.findCodeRequests(email);
+    const recent = requests.filter((t) => t.getTime() > now - DEFAULT_MAX_PER_HOUR_WINDOW_MS);
+
+    if (recent.length >= this.maxPerHour) {
+      return { ok: false, error: "rate-limited" };
+    }
+
+    const last = recent.at(-1);
+    if (last && now - last.getTime() < this.cooldownMs) {
+      return { ok: false, error: "cooldown-active" };
+    }
+
+    const requestedAt = new Date(now);
     const code = generateCode();
-    const expiresAt = new Date(this.now().getTime() + this.codeTtlMs);
-    this.store.savePendingCode({
-      code,
-      email,
-      expiresAt,
-      remainingAttempts: this.maxAttempts,
-    });
+    const expiresAt = new Date(now + this.codeTtlMs);
+    this.store.savePendingCode({ code, email, expiresAt, remainingAttempts: this.maxAttempts });
+    this.store.recordCodeRequest(email, requestedAt);
 
     return { ok: true, email, code };
   }
@@ -109,6 +126,18 @@ export class AuthEngine {
     this.store.createSession({ token, candidateId: candidate.id, expiresAt });
 
     return { ok: true, token, candidate };
+  }
+
+  async getPendingCode(email: string): Promise<{
+    code: string;
+    email: string;
+    expiresAt: Date;
+  } | null> {
+    const pending = this.store.findPendingCode(normalizeEmail(email));
+    if (!pending) {
+      return null;
+    }
+    return { code: pending.code, email: pending.email, expiresAt: pending.expiresAt };
   }
 
   async getCandidate(token: string): Promise<Candidate | null> {

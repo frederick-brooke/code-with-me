@@ -4,12 +4,33 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { authEngine, SESSION_COOKIE } from "@/lib/auth";
 import { clearSessionCookie, createSessionCookie } from "@/lib/auth/session";
+import { isMailConfigured, loginCodeSender } from "@/lib/mail";
 import type { RequestCodeError, VerifyCodeError } from "@/lib/auth/types";
+
+const APP_URL = (process.env.APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
 
 export type RequestCodeActionState =
   | { status: "start" }
-  | { status: "sent"; email: string; code?: string }
-  | { status: "error"; error: RequestCodeError };
+  | {
+      status: "error";
+      error: RequestCodeError | "send-failed" | "no-active-code";
+      email?: string;
+    }
+  | { status: "sent"; email: string; code?: string };
+
+async function sendOrSurface(email: string, code: string): Promise<RequestCodeActionState> {
+  try {
+    const magicLink = `${APP_URL}/verify?email=${encodeURIComponent(email)}&code=${encodeURIComponent(code)}`;
+    await loginCodeSender.sendLoginCode({ to: email, code, magicLink });
+  } catch (error) {
+    console.error("Failed to send login code", error);
+    return { status: "error", error: "send-failed", email };
+  }
+
+  // No mail key configured (local dev): surface the code on screen instead.
+  const visibleCode = isMailConfigured ? undefined : code;
+  return { status: "sent", email, code: visibleCode };
+}
 
 export async function requestCodeAction(
   _prev: RequestCodeActionState,
@@ -22,11 +43,21 @@ export async function requestCodeAction(
     return { status: "error", error: result.error };
   }
 
-  // No mail server is configured yet, so the code is surfaced to the UI.
-  // Never leak it outside development.
-  const code = process.env.NODE_ENV === "production" ? undefined : result.code;
+  return sendOrSurface(result.email, result.code);
+}
 
-  return { status: "sent", email: result.email, code };
+export async function resendCodeAction(
+  _prev: RequestCodeActionState,
+  formData: FormData,
+): Promise<RequestCodeActionState> {
+  const email = String(formData.get("email") ?? "");
+  const pending = await authEngine.getPendingCode(email);
+
+  if (!pending) {
+    return { status: "error", error: "no-active-code" };
+  }
+
+  return sendOrSurface(pending.email, pending.code);
 }
 
 export type VerifyCodeActionState =
