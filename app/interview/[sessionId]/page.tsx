@@ -6,6 +6,7 @@ import { SessionEngine } from "@/lib/engine/session-engine";
 import { SignOutButton } from "@/app/components/sign-out-button";
 import { pillButtonClassName } from "@/app/components/pill-button";
 import { SolveSurface } from "@/app/components/solve-surface";
+import { AssessorConversation } from "@/app/components/assessor-conversation";
 
 export default async function InterviewPage({
   params,
@@ -41,6 +42,18 @@ export default async function InterviewPage({
             Phase: {view.session.phase}
           </p>
         </header>
+
+        <section className="rounded-2xl border border-black/[.08] bg-white p-6 dark:border-white/[.145] dark:bg-black">
+          <span className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+            The Assessor
+          </span>
+          <div className="mt-3">
+            <AssessorConversation
+              sessionId={sessionId}
+              candidateId={candidate.id}
+            />
+          </div>
+        </section>
 
         <SolveSurface
           sessionId={sessionId}
