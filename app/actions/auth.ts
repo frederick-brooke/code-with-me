@@ -8,7 +8,7 @@ import type { RequestCodeError, VerifyCodeError } from "@/lib/auth/types";
 
 export type RequestCodeActionState =
   | { status: "start" }
-  | { status: "sent"; email: string; code: string }
+  | { status: "sent"; email: string; code?: string }
   | { status: "error"; error: RequestCodeError };
 
 export async function requestCodeAction(
@@ -22,7 +22,11 @@ export async function requestCodeAction(
     return { status: "error", error: result.error };
   }
 
-  return { status: "sent", email: result.email, code: result.code };
+  // No mail server is configured yet, so the code is surfaced to the UI.
+  // Never leak it outside development.
+  const code = process.env.NODE_ENV === "production" ? undefined : result.code;
+
+  return { status: "sent", email: result.email, code };
 }
 
 export type VerifyCodeActionState =

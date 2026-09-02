@@ -8,6 +8,7 @@ export interface PendingCode {
   code: string;
   email: string;
   expiresAt: Date;
+  remainingAttempts: number;
 }
 
 export interface AuthSession {
@@ -34,7 +35,11 @@ export type RequestCodeResult =
   | { ok: true; email: string; code: string }
   | { ok: false; error: RequestCodeError };
 
-export type VerifyCodeError = "invalid-email" | "invalid-code" | "expired-code";
+export type VerifyCodeError =
+  | "invalid-email"
+  | "invalid-code"
+  | "expired-code"
+  | "too-many-attempts";
 
 export type VerifyCodeResult =
   | { ok: true; token: string; candidate: Candidate }
@@ -44,4 +49,5 @@ export interface AuthEngineOptions {
   now?: () => Date;
   codeTtlMs?: number;
   sessionTtlMs?: number;
+  maxAttempts?: number;
 }

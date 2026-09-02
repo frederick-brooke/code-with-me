@@ -8,8 +8,9 @@ import type {
 import type { AuthStore } from "@/lib/auth/types";
 
 const CODE_LENGTH = 6;
-const DEFAULT_CODE_TTL_MS = 15 * 60 * 1000;
-const DEFAULT_SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+export const DEFAULT_CODE_TTL_MS = 15 * 60 * 1000;
+export const DEFAULT_SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+export const DEFAULT_MAX_ATTEMPTS = 5;
 const TOKEN_BYTES = 32;
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -38,6 +39,7 @@ export class AuthEngine {
   private readonly now: () => Date;
   private readonly codeTtlMs: number;
   private readonly sessionTtlMs: number;
+  private readonly maxAttempts: number;
 
   constructor(
     private readonly store: AuthStore,
@@ -46,6 +48,7 @@ export class AuthEngine {
     this.now = options.now ?? (() => new Date());
     this.codeTtlMs = options.codeTtlMs ?? DEFAULT_CODE_TTL_MS;
     this.sessionTtlMs = options.sessionTtlMs ?? DEFAULT_SESSION_TTL_MS;
+    this.maxAttempts = options.maxAttempts ?? DEFAULT_MAX_ATTEMPTS;
   }
 
   async requestCode(rawEmail: string): Promise<RequestCodeResult> {
@@ -56,7 +59,12 @@ export class AuthEngine {
 
     const code = generateCode();
     const expiresAt = new Date(this.now().getTime() + this.codeTtlMs);
-    this.store.savePendingCode({ code, email, expiresAt });
+    this.store.savePendingCode({
+      code,
+      email,
+      expiresAt,
+      remainingAttempts: this.maxAttempts,
+    });
 
     return { ok: true, email, code };
   }
@@ -67,14 +75,30 @@ export class AuthEngine {
       return { ok: false, error: "invalid-email" };
     }
 
+    const code = rawCode.trim();
     const pending = this.store.findPendingCode(email);
-    if (!pending || !codesMatch(pending.code, rawCode)) {
+    if (!pending) {
       return { ok: false, error: "invalid-code" };
     }
 
     if (pending.expiresAt.getTime() <= this.now().getTime()) {
       this.store.deletePendingCode(email);
       return { ok: false, error: "expired-code" };
+    }
+
+    if (pending.remainingAttempts <= 0) {
+      this.store.deletePendingCode(email);
+      return { ok: false, error: "too-many-attempts" };
+    }
+
+    if (!codesMatch(pending.code, code)) {
+      const remaining = pending.remainingAttempts - 1;
+      if (remaining <= 0) {
+        this.store.deletePendingCode(email);
+        return { ok: false, error: "too-many-attempts" };
+      }
+      this.store.savePendingCode({ ...pending, remainingAttempts: remaining });
+      return { ok: false, error: "invalid-code" };
     }
 
     this.store.deletePendingCode(email);

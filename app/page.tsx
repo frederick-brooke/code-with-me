@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getCachedCurrentCandidate } from "@/lib/auth/session";
 import { SignOutButton } from "@/app/components/sign-out-button";
+import { pillButtonClassName } from "@/app/components/pill-button";
 
 export default async function Home() {
   const candidate = await getCachedCurrentCandidate();
@@ -19,7 +20,7 @@ export default async function Home() {
           ) : (
             <Link
               href="/sign-in"
-              className="rounded-full border border-solid border-black/[.08] px-4 py-2 text-sm font-medium transition-colors hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-white/[.06]"
+              className={pillButtonClassName}
             >
               Sign in
             </Link>

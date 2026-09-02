@@ -13,7 +13,7 @@ const initialRequestState: RequestCodeActionState = { status: "start" };
 const initialVerifyState: VerifyCodeActionState = { status: "idle" };
 
 function errorMessage(
-  error: "invalid-email" | "invalid-code" | "expired-code",
+  error: "invalid-email" | "invalid-code" | "expired-code" | "too-many-attempts",
 ): string {
   switch (error) {
     case "invalid-email":
@@ -22,6 +22,8 @@ function errorMessage(
       return "That code didn't match. Check it and try again.";
     case "expired-code":
       return "That code has expired. Request a new one.";
+    case "too-many-attempts":
+      return "Too many wrong attempts. Request a new code.";
   }
 }
 
@@ -60,10 +62,12 @@ export default function SignInPage() {
             />
           </label>
 
-          <p className="text-xs text-zinc-500">
-            Debug build only: the code is {requestState.code} (no mail server
-            is configured yet).
-          </p>
+          {requestState.status === "sent" && requestState.code && (
+            <p className="text-xs text-zinc-500">
+              Debug build only: the code is {requestState.code} (no mail server
+              is configured yet).
+            </p>
+          )}
 
           {verifyState.status === "error" && (
             <p className="text-sm text-red-600 dark:text-red-400">

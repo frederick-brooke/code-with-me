@@ -6,12 +6,14 @@ function makeEngine(overrides?: {
   now?: () => Date;
   codeTtlMs?: number;
   sessionTtlMs?: number;
+  maxAttempts?: number;
 }) {
   const store = new InMemoryAuthStore();
   const engine = new AuthEngine(store, {
     now: overrides?.now ?? (() => new Date("2026-01-01T00:00:00Z")),
     codeTtlMs: overrides?.codeTtlMs ?? 15 * 60 * 1000,
     sessionTtlMs: overrides?.sessionTtlMs ?? 30 * 24 * 60 * 60 * 1000,
+    maxAttempts: overrides?.maxAttempts ?? 5,
   });
   return { engine, store };
 }
@@ -84,6 +86,40 @@ describe("AuthEngine", () => {
       if (!result.ok) {
         expect(result.error).toBe("invalid-code");
       }
+    });
+
+    it("accepts a code with surrounding whitespace", async () => {
+      const { engine } = makeEngine();
+      const requested = await engine.requestCode("candidate@example.com");
+      expect(requested.ok).toBe(true);
+      const code = requested.ok ? requested.code : "";
+
+      const result = await engine.verifyCode("candidate@example.com", `  ${code} `);
+      expect(result.ok).toBe(true);
+    });
+
+    it("locks out a code after repeated wrong attempts", async () => {
+      const { engine } = makeEngine({ maxAttempts: 3 });
+      const requested = await engine.requestCode("candidate@example.com");
+      expect(requested.ok).toBe(true);
+
+      for (let i = 0; i < 2; i++) {
+        const wrong = await engine.verifyCode("candidate@example.com", "000000");
+        expect(wrong.ok).toBe(false);
+        if (!wrong.ok) {
+          expect(wrong.error).toBe("invalid-code");
+        }
+      }
+
+      const locked = await engine.verifyCode("candidate@example.com", "000000");
+      expect(locked.ok).toBe(false);
+      if (!locked.ok) {
+        expect(locked.error).toBe("too-many-attempts");
+      }
+
+      const code = requested.ok ? requested.code : "";
+      const afterLock = await engine.verifyCode("candidate@example.com", code);
+      expect(afterLock.ok).toBe(false);
     });
 
     it("rejects an expired code", async () => {

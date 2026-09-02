@@ -2,9 +2,10 @@ import "server-only";
 import { cache } from "react";
 import { cookies } from "next/headers";
 import { authEngine, SESSION_COOKIE } from "@/lib/auth";
+import { DEFAULT_SESSION_TTL_MS } from "@/lib/auth/engine";
 import type { Candidate } from "@/lib/auth/types";
 
-export const SESSION_TTL_SECONDS = 30 * 24 * 60 * 60;
+const SESSION_TTL_SECONDS = Math.floor(DEFAULT_SESSION_TTL_MS / 1000);
 
 export async function createSessionCookie(token: string): Promise<void> {
   (await cookies()).set(SESSION_COOKIE, token, {
