@@ -6,10 +6,10 @@ export type * from "@/lib/data/types";
 export { seedProblems } from "@/lib/data/seeds/problems";
 export { InMemoryDataStore } from "@/lib/data/store";
 
-export function createSeededDataStore(): DataStore {
+export async function createSeededDataStore(): Promise<DataStore> {
   const store = new InMemoryDataStore();
   for (const problem of seedProblems) {
-    store.createProblem(problem);
+    await store.createProblem(problem);
   }
   return store;
 }

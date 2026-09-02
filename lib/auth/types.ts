@@ -18,17 +18,17 @@ export interface AuthSession {
 }
 
 export interface AuthStore {
-  findCandidateById(id: string): Candidate | null;
-  findCandidateByEmail(email: string): Candidate | null;
-  createCandidate(email: string): Candidate;
-  savePendingCode(pending: PendingCode): void;
-  findPendingCode(email: string): PendingCode | null;
-  deletePendingCode(email: string): void;
-  recordCodeRequest(email: string, timestamp: Date): void;
-  findCodeRequests(email: string): Date[];
-  createSession(session: AuthSession): void;
-  findSession(token: string): AuthSession | null;
-  deleteSession(token: string): void;
+  findCandidateById(id: string): Promise<Candidate | null>;
+  findCandidateByEmail(email: string): Promise<Candidate | null>;
+  createCandidate(email: string): Promise<Candidate>;
+  savePendingCode(pending: PendingCode): Promise<void>;
+  findPendingCode(email: string): Promise<PendingCode | null>;
+  deletePendingCode(email: string): Promise<void>;
+  recordCodeRequest(email: string, timestamp: Date): Promise<void>;
+  findCodeRequests(email: string): Promise<Date[]>;
+  createSession(session: AuthSession): Promise<void>;
+  findSession(token: string): Promise<AuthSession | null>;
+  deleteSession(token: string): Promise<void>;
 }
 
 export type RequestCodeError = "invalid-email" | "cooldown-active" | "rate-limited";

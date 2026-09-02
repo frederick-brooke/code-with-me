@@ -65,7 +65,7 @@ export class AuthEngine {
     }
 
     const now = this.now().getTime();
-    const requests = this.store.findCodeRequests(email);
+    const requests = await this.store.findCodeRequests(email);
     const recent = requests.filter((t) => t.getTime() > now - DEFAULT_MAX_PER_HOUR_WINDOW_MS);
 
     if (recent.length >= this.maxPerHour) {
@@ -80,8 +80,8 @@ export class AuthEngine {
     const requestedAt = new Date(now);
     const code = generateCode();
     const expiresAt = new Date(now + this.codeTtlMs);
-    this.store.savePendingCode({ code, email, expiresAt, remainingAttempts: this.maxAttempts });
-    this.store.recordCodeRequest(email, requestedAt);
+    await this.store.savePendingCode({ code, email, expiresAt, remainingAttempts: this.maxAttempts });
+    await this.store.recordCodeRequest(email, requestedAt);
 
     return { ok: true, email, code };
   }
@@ -93,37 +93,37 @@ export class AuthEngine {
     }
 
     const code = rawCode.trim();
-    const pending = this.store.findPendingCode(email);
+    const pending = await this.store.findPendingCode(email);
     if (!pending) {
       return { ok: false, error: "invalid-code" };
     }
 
     if (pending.expiresAt.getTime() <= this.now().getTime()) {
-      this.store.deletePendingCode(email);
+      await this.store.deletePendingCode(email);
       return { ok: false, error: "expired-code" };
     }
 
     if (pending.remainingAttempts <= 0) {
-      this.store.deletePendingCode(email);
+      await this.store.deletePendingCode(email);
       return { ok: false, error: "too-many-attempts" };
     }
 
     if (!codesMatch(pending.code, code)) {
       const remaining = pending.remainingAttempts - 1;
       if (remaining <= 0) {
-        this.store.deletePendingCode(email);
+        await this.store.deletePendingCode(email);
         return { ok: false, error: "too-many-attempts" };
       }
-      this.store.savePendingCode({ ...pending, remainingAttempts: remaining });
+      await this.store.savePendingCode({ ...pending, remainingAttempts: remaining });
       return { ok: false, error: "invalid-code" };
     }
 
-    this.store.deletePendingCode(email);
+    await this.store.deletePendingCode(email);
 
-    const candidate = this.findOrCreateCandidate(email);
+    const candidate = await this.findOrCreateCandidate(email);
     const token = generateToken();
     const expiresAt = new Date(this.now().getTime() + this.sessionTtlMs);
-    this.store.createSession({ token, candidateId: candidate.id, expiresAt });
+    await this.store.createSession({ token, candidateId: candidate.id, expiresAt });
 
     return { ok: true, token, candidate };
   }
@@ -133,7 +133,7 @@ export class AuthEngine {
     email: string;
     expiresAt: Date;
   } | null> {
-    const pending = this.store.findPendingCode(normalizeEmail(email));
+    const pending = await this.store.findPendingCode(normalizeEmail(email));
     if (!pending) {
       return null;
     }
@@ -141,13 +141,13 @@ export class AuthEngine {
   }
 
   async getCandidate(token: string): Promise<Candidate | null> {
-    const session = this.store.findSession(token);
+    const session = await this.store.findSession(token);
     if (!session) {
       return null;
     }
 
     if (session.expiresAt.getTime() <= this.now().getTime()) {
-      this.store.deleteSession(token);
+      await this.store.deleteSession(token);
       return null;
     }
 
@@ -155,11 +155,11 @@ export class AuthEngine {
   }
 
   async signOut(token: string): Promise<void> {
-    this.store.deleteSession(token);
+    await this.store.deleteSession(token);
   }
 
-  private findOrCreateCandidate(email: string): Candidate {
-    const existing = this.store.findCandidateByEmail(email);
+  private async findOrCreateCandidate(email: string): Promise<Candidate> {
+    const existing = await this.store.findCandidateByEmail(email);
     if (existing) {
       return existing;
     }

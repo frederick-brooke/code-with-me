@@ -17,7 +17,7 @@ export class InMemoryDataStore implements DataStore {
   private messages = new Map<string, Message>();
   private summaries = new Map<string, PerformanceSummary>();
 
-  createCandidate(email: string): Candidate {
+  async createCandidate(email: string): Promise<Candidate> {
     const candidate: Candidate = {
       id: randomUUID(),
       email,
@@ -27,11 +27,11 @@ export class InMemoryDataStore implements DataStore {
     return candidate;
   }
 
-  findCandidateById(id: string): Candidate | null {
+  async findCandidateById(id: string): Promise<Candidate | null> {
     return this.candidates.get(id) ?? null;
   }
 
-  findCandidateByEmail(email: string): Candidate | null {
+  async findCandidateByEmail(email: string): Promise<Candidate | null> {
     for (const candidate of this.candidates.values()) {
       if (candidate.email === email) {
         return candidate;
@@ -40,62 +40,62 @@ export class InMemoryDataStore implements DataStore {
     return null;
   }
 
-  createProblem(problem: Problem): Problem {
+  async createProblem(problem: Problem): Promise<Problem> {
     this.problems.set(problem.id, problem);
     return problem;
   }
 
-  findProblemById(id: string): Problem | null {
+  async findProblemById(id: string): Promise<Problem | null> {
     return this.problems.get(id) ?? null;
   }
 
-  listProblems(): Problem[] {
+  async listProblems(): Promise<Problem[]> {
     return [...this.problems.values()];
   }
 
-  createSession(session: Session): Session {
+  async createSession(session: Session): Promise<Session> {
     this.sessions.set(session.id, session);
     return session;
   }
 
-  findSessionById(id: string): Session | null {
+  async findSessionById(id: string): Promise<Session | null> {
     return this.sessions.get(id) ?? null;
   }
 
-  listSessionsByCandidate(candidateId: string): Session[] {
+  async listSessionsByCandidate(candidateId: string): Promise<Session[]> {
     return [...this.sessions.values()].filter(
       (session) => session.candidateId === candidateId,
     );
   }
 
-  createRun(run: Run): Run {
+  async createRun(run: Run): Promise<Run> {
     this.runs.set(run.id, run);
     return run;
   }
 
-  listRunsBySession(sessionId: string): Run[] {
+  async listRunsBySession(sessionId: string): Promise<Run[]> {
     return [...this.runs.values()]
       .filter((run) => run.sessionId === sessionId)
       .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
   }
 
-  createMessage(message: Message): Message {
+  async createMessage(message: Message): Promise<Message> {
     this.messages.set(message.id, message);
     return message;
   }
 
-  listMessagesBySession(sessionId: string): Message[] {
+  async listMessagesBySession(sessionId: string): Promise<Message[]> {
     return [...this.messages.values()]
       .filter((message) => message.sessionId === sessionId)
       .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
   }
 
-  createPerformanceSummary(summary: PerformanceSummary): PerformanceSummary {
+  async createPerformanceSummary(summary: PerformanceSummary): Promise<PerformanceSummary> {
     this.summaries.set(summary.id, summary);
     return summary;
   }
 
-  findPerformanceSummaryBySession(sessionId: string): PerformanceSummary | null {
+  async findPerformanceSummaryBySession(sessionId: string): Promise<PerformanceSummary | null> {
     for (const summary of this.summaries.values()) {
       if (summary.sessionId === sessionId) {
         return summary;

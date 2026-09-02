@@ -7,11 +7,11 @@ export class InMemoryAuthStore implements AuthStore {
   private sessions = new Map<string, AuthSession>();
   private codeRequests = new Map<string, Date[]>();
 
-  findCandidateById(id: string): Candidate | null {
+  async findCandidateById(id: string): Promise<Candidate | null> {
     return this.candidates.get(id) ?? null;
   }
 
-  findCandidateByEmail(email: string): Candidate | null {
+  async findCandidateByEmail(email: string): Promise<Candidate | null> {
     for (const candidate of this.candidates.values()) {
       if (candidate.email === email) {
         return candidate;
@@ -20,7 +20,7 @@ export class InMemoryAuthStore implements AuthStore {
     return null;
   }
 
-  createCandidate(email: string): Candidate {
+  async createCandidate(email: string): Promise<Candidate> {
     const candidate: Candidate = {
       id: randomUUID(),
       email,
@@ -30,36 +30,36 @@ export class InMemoryAuthStore implements AuthStore {
     return candidate;
   }
 
-  savePendingCode(pending: PendingCode): void {
+  async savePendingCode(pending: PendingCode): Promise<void> {
     this.pendingCodes.set(pending.email, pending);
   }
 
-  findPendingCode(email: string): PendingCode | null {
+  async findPendingCode(email: string): Promise<PendingCode | null> {
     return this.pendingCodes.get(email) ?? null;
   }
 
-  deletePendingCode(email: string): void {
+  async deletePendingCode(email: string): Promise<void> {
     this.pendingCodes.delete(email);
   }
 
-  recordCodeRequest(email: string, timestamp: Date): void {
+  async recordCodeRequest(email: string, timestamp: Date): Promise<void> {
     const existing = this.codeRequests.get(email) ?? [];
     this.codeRequests.set(email, [...existing, timestamp]);
   }
 
-  findCodeRequests(email: string): Date[] {
+  async findCodeRequests(email: string): Promise<Date[]> {
     return this.codeRequests.get(email) ?? [];
   }
 
-  createSession(session: AuthSession): void {
+  async createSession(session: AuthSession): Promise<void> {
     this.sessions.set(session.token, session);
   }
 
-  findSession(token: string): AuthSession | null {
+  async findSession(token: string): Promise<AuthSession | null> {
     return this.sessions.get(token) ?? null;
   }
 
-  deleteSession(token: string): void {
+  async deleteSession(token: string): Promise<void> {
     this.sessions.delete(token);
   }
 }

@@ -31,12 +31,12 @@ describe("seeded Problems", () => {
     }
   });
 
-  it("are queryable through a seeded store", () => {
-    const store = createSeededDataStore();
-    const stored = store.listProblems();
+  it("are queryable through a seeded store", async () => {
+    const store = await createSeededDataStore();
+    const stored = await store.listProblems();
     expect(stored).toHaveLength(seedProblems.length);
 
-    const twoSum = store.findProblemById("two-sum");
+    const twoSum = await store.findProblemById("two-sum");
     expect(twoSum?.title).toBe("Two Sum");
     expect(twoSum?.sampleTests.length).toBeGreaterThanOrEqual(1);
     expect(twoSum?.hiddenTests.length).toBeGreaterThanOrEqual(1);

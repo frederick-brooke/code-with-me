@@ -57,24 +57,24 @@ export interface PerformanceSummary {
 }
 
 export interface DataStore {
-  createCandidate(email: string): Candidate;
-  findCandidateById(id: string): Candidate | null;
-  findCandidateByEmail(email: string): Candidate | null;
+  createCandidate(email: string): Promise<Candidate>;
+  findCandidateById(id: string): Promise<Candidate | null>;
+  findCandidateByEmail(email: string): Promise<Candidate | null>;
 
-  createProblem(problem: Problem): Problem;
-  findProblemById(id: string): Problem | null;
-  listProblems(): Problem[];
+  createProblem(problem: Problem): Promise<Problem>;
+  findProblemById(id: string): Promise<Problem | null>;
+  listProblems(): Promise<Problem[]>;
 
-  createSession(session: Session): Session;
-  findSessionById(id: string): Session | null;
-  listSessionsByCandidate(candidateId: string): Session[];
+  createSession(session: Session): Promise<Session>;
+  findSessionById(id: string): Promise<Session | null>;
+  listSessionsByCandidate(candidateId: string): Promise<Session[]>;
 
-  createRun(run: Run): Run;
-  listRunsBySession(sessionId: string): Run[];
+  createRun(run: Run): Promise<Run>;
+  listRunsBySession(sessionId: string): Promise<Run[]>;
 
-  createMessage(message: Message): Message;
-  listMessagesBySession(sessionId: string): Message[];
+  createMessage(message: Message): Promise<Message>;
+  listMessagesBySession(sessionId: string): Promise<Message[]>;
 
-  createPerformanceSummary(summary: PerformanceSummary): PerformanceSummary;
-  findPerformanceSummaryBySession(sessionId: string): PerformanceSummary | null;
+  createPerformanceSummary(summary: PerformanceSummary): Promise<PerformanceSummary>;
+  findPerformanceSummaryBySession(sessionId: string): Promise<PerformanceSummary | null>;
 }
