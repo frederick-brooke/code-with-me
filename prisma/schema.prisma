@@ -1,0 +1,111 @@
+// Prisma schema for Code with Me.
+// See docs/agents/issue-tracker.md and the spec (issue #1) for the entity map.
+// Prisma 7: the datasource URL lives in prisma.config.ts, not here.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Difficulty {
+  easy
+  medium
+  hard
+}
+
+enum SessionPhase {
+  introduction
+  solve
+  wrap_up
+  debrief
+}
+
+enum Speaker {
+  candidate
+  assessor
+}
+
+model Candidate {
+  id         String      @id @default(uuid())
+  email      String      @unique
+  createdAt  DateTime    @default(now())
+  sessions   Session[]   @relation("CandidateSessions")
+  authSessions AuthSession[]
+  pendingCodes PendingCode[]
+}
+
+model Problem {
+  id              String    @id
+  title           String
+  statement       String
+  difficulty      Difficulty
+  starterTemplate String?
+  sampleTests     Json      @default("[]")
+  hiddenTests     Json      @default("[]")
+  sessions        Session[]
+}
+
+model Session {
+  id          String              @id @default(uuid())
+  candidateId String
+  problemId   String
+  phase       SessionPhase        @default(introduction)
+  startedAt   DateTime            @default(now())
+  endedAt     DateTime?
+  candidate   Candidate           @relation("CandidateSessions", fields: [candidateId], references: [id])
+  problem     Problem             @relation(fields: [problemId], references: [id])
+  runs        Run[]
+  messages    Message[]
+  summary     PerformanceSummary?
+}
+
+model Run {
+  id          String   @id @default(uuid())
+  sessionId   String
+  session     Session  @relation(fields: [sessionId], references: [id])
+  code        String
+  passedCount Int
+  failedCount Int
+  createdAt   DateTime @default(now())
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  sessionId String
+  session   Session  @relation(fields: [sessionId], references: [id])
+  speaker   Speaker
+  text      String
+  createdAt DateTime @default(now())
+}
+
+model PerformanceSummary {
+  id        String   @id @default(uuid())
+  sessionId String   @unique
+  session   Session  @relation(fields: [sessionId], references: [id])
+  content   String
+  createdAt DateTime @default(now())
+}
+
+// Auth rows: a single-use one-time code per Candidate email,
+// and a durable auth Session keyed by its opaque token.
+model PendingCode {
+  email             String    @id
+  candidateId       String
+  candidate         Candidate @relation(fields: [candidateId], references: [id])
+  code              String
+  expiresAt         DateTime
+  remainingAttempts Int
+  createdAt         DateTime  @default(now())
+}
+
+model AuthSession {
+  token       String    @id
+  candidateId String
+  candidate   Candidate @relation(fields: [candidateId], references: [id])
+  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
+}

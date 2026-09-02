@@ -4,12 +4,19 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate deploy",
+    "prebuild": "prisma generate",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.10.0",
+    "@prisma/client": "^7.10.0",
+    "dotenv": "^17.4.2",
     "next": "16.3.4",
     "react": "19.2.8",
     "react-dom": "19.2.8",
@@ -23,6 +30,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.4",
+    "prisma": "^7.10.0",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.1.11"

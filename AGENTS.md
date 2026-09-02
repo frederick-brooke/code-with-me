@@ -4,12 +4,13 @@ Fresh Next.js 16.3.4 scaffold — only starter template code, no custom work yet
 
 ## Commands
 
-| `npm run dev`   | Dev server on `localhost:3000` |
-| `npm run build` | `next build`                   |
-| `npm run lint`  | ESLint (flat config)           |
-| `npm run start` | `next start`                   |
-
-No test framework installed (`npm test` does nothing).
+| `npm run dev`      | Dev server on `localhost:3000` |
+| `npm run build`    | `prisma generate && next build` (prebuild hook) |
+| `npm run lint`     | ESLint (flat config)           |
+| `npm run start`    | `next start`                   |
+| `npm run test`     | Vitest                         |
+| `npm run db:generate` | `prisma generate`          |
+| `npm run db:migrate`  | `prisma migrate deploy` (apply migrations on a deploy) |
 
 ## Conventions
 
