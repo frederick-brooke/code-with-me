@@ -17,7 +17,7 @@ The AI voice agent that runs the interview: introduces the Problem, answers ques
 _Avoid_: Interviewer, coach
 
 **Session**:
-One complete mock-interview run for a single Problem. Driven by the Assessor through four phases — Introduction, Solve, Wrap-up, Debrief — with the Candidate able to end from anywhere. The Candidate initiates the move from Solve to Wrap-up. Keeps one live Conversation open for its whole lifetime.
+One complete mock-interview run for a single Problem. Driven by the Assessor through the five live phases — Introduction, Clarifying, Approach, Implementation, Wrap-up — ending in Debrief, with the Candidate able to end from anywhere. The Assessor leads the arc: it moves the Session between phases and decides when the interview is over. Keeps one live Conversation open for its whole lifetime.
 _Avoid_: Interview, attempt, run
 
 **Conversation**:
@@ -29,7 +29,7 @@ A backend endpoint the managed Assessor can invoke mid-turn for fresh, volatile 
 _Avoid_: Plug-in, skill, function call (in docs)
 
 **Phases**:
-The four scripted stages of a Session. **Introduction**: the Assessor welcomes the Candidate and pitches the Problem. **Solve**: the Candidate reads, codes, Runs, and asks questions. **Wrap-up**: the Candidate signals done and the Assessor asks 1–2 closing questions. **Debrief**: the Session ends and the Performance Summary is produced. An early exit from any phase skips straight to Debrief.
+The scripted stages of a Session. **Introduction**: the Assessor welcomes the Candidate and pitches the Problem. **Clarifying**: the Candidate asks about the task and the Assessor clarifies their questions. **Approach**: the Candidate is prompted to talk through their approach and the Assessor challenges their choices, asking why decisions were made. **Implementation**: the Candidate codes while the Assessor watches and interjects when it has a question; failing Runs loop back into this phase. **Wrap-up**: a passing Run is the natural cue to close; the Assessor asks if the Candidate wants to keep optimizing, then 1–2 closing questions. **Debrief**: the Session ends and the Performance Summary is produced. The Assessor moves the Session through the arc; the Candidate may end from any phase, skipping straight to Debrief.
 
 **Hidden test**:
 A test in the Problem's suite that is only shown to the Candidate as a pass/fail count. Every Run executes against the hidden suite. The Assessor sees only the same pass/fail counts the Candidate sees, never the raw failures.
@@ -44,13 +44,17 @@ Assessor guidance that describes approach and structure only, never a concrete i
 _Avoid_: Clue, spoiler
 
 **Run**:
-An explicit event where the Candidate submits their code to the compiler. The Assessor reacts only to explicit events (Run, a question, a Hint request, Session end) — never to keystrokes. There is no Session time limit; the Assessor suggests realistic pacing instead.
+An explicit event where the Candidate submits their code to the compiler. The Assessor reacts to explicit events and natural silence, and reads the Candidate's Working Code snapshots — never keystroke-by-keystroke. A failing Run keeps the Session in Implementation; a passing Run is the natural cue for the Assessor to move to Wrap-up. There is no Session time limit; the Assessor suggests realistic pacing instead.
 _Avoid_: Submit, execute
+
+**Working Code**:
+The Candidate's in-editor code between Runs, captured as a debounced snapshot so the Assessor can read where they are without reacting to every keystroke. Current state, unlike a Run's immutable snapshot of an explicit event.
+_Avoid_: Draft, work-in-progress, current code (docs)
 
 **Session Record**:
 The one persisted record per Session: the Problem chosen, final code snapshot, test-case results, the Q&A transcript, and the Performance Summary.
 _Avoid_: Attempt history, result
 
 **Performance Summary**:
-Post-interview written artifact (never spoken aloud) for the Candidate covering what went well, even-better-if, problems, and a technical review of the solution. Computed end-of-session as a dedicated call to the same LLM that played the Assessor, fed the whole Session Record.
+Post-interview written artifact (never spoken aloud) for the Candidate covering what went well, even-better-if, problems, and a technical review of the solution. The exit event of a Session: on ending, the live Conversation closes while a dedicated call to the same LLM that played the Assessor, fed the whole Session Record, produces the Summary.
 _Avoid_: Report, debrief, feedback
