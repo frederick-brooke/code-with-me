@@ -117,61 +117,70 @@ export function SolveSurface({
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <section className="rounded-2xl border border-black/[.08] bg-white p-6 text-sm leading-7 text-zinc-600 dark:border-white/[.145] dark:bg-black dark:text-zinc-400">
-        <p className="whitespace-pre-wrap">{problem.statement}</p>
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="flex min-w-0 flex-col gap-6">
+        <section className="overflow-hidden rounded-2xl border border-black/[.08] bg-white dark:border-white/[.145] dark:bg-black">
+          <CodeMirror
+            value={code}
+            onChange={(value) => setCode(value)}
+            height="420px"
+            extensions={[python()]}
+            theme={prefersDark ? oneDark : "light"}
+            basicSetup={{ foldGutter: false }}
+            className="text-sm"
+            aria-label="Python code editor"
+          />
+        </section>
+
+        <div className="flex items-center justify-between gap-4">
+          <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            {status.kind === "idle"
+              ? hasResults
+                ? `Latest saved Run: ${formatCounts(initialPassed, initialFailed)}`
+                : "Run your code against the hidden tests."
+              : runLabel(status)}
+          </p>
+          <button
+            type="button"
+            onClick={handleRun}
+            disabled={busy}
+            className={`${pillButtonClassName} disabled:cursor-not-allowed disabled:opacity-50`}
+          >
+            Run
+          </button>
+        </div>
+
+        {saveFailed && (
+          <p className="text-sm text-amber-600 dark:text-amber-400">
+            The Run finished, but it could not be saved to this Session.
+          </p>
+        )}
+      </div>
+
+      <aside className="flex flex-col gap-6 self-start lg:sticky lg:top-6">
+        <section className="rounded-2xl border border-black/[.08] bg-white p-6 text-sm leading-7 text-zinc-600 dark:border-white/[.145] dark:bg-black dark:text-zinc-400">
+          <span className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+            Question
+          </span>
+          <p className="mt-3 whitespace-pre-wrap">{problem.statement}</p>
+        </section>
+
         {problem.sampleTests.length > 0 && (
-          <div className="mt-4 flex flex-col gap-2 border-t border-black/[.08] pt-4 dark:border-white/[.145]">
+          <section className="rounded-2xl border border-black/[.08] bg-white p-6 text-sm leading-7 text-zinc-600 dark:border-white/[.145] dark:bg-black dark:text-zinc-400">
             <span className="text-xs font-medium uppercase tracking-wide text-zinc-500">
               Sample tests
             </span>
-            <ul className="flex flex-col gap-1 font-mono text-xs text-zinc-500 dark:text-zinc-400">
+            <ul className="mt-3 flex flex-col gap-2 font-mono text-xs text-zinc-500 dark:text-zinc-400">
               {problem.sampleTests.map((test, index) => (
-                <li key={index}>
-                  <code>{test.input}</code> → <code>{test.expectedOutput}</code>
+                <li key={index} className="flex flex-col gap-1">
+                  <code>{test.input}</code>
+                  <code>→ {test.expectedOutput}</code>
                 </li>
               ))}
             </ul>
-          </div>
+          </section>
         )}
-      </section>
-
-      <section className="overflow-hidden rounded-2xl border border-black/[.08] bg-white dark:border-white/[.145] dark:bg-black">
-        <CodeMirror
-          value={code}
-          onChange={(value) => setCode(value)}
-          height="280px"
-          extensions={[python()]}
-          theme={prefersDark ? oneDark : "light"}
-          basicSetup={{ foldGutter: false }}
-          className="text-sm"
-          aria-label="Python code editor"
-        />
-      </section>
-
-      <div className="flex items-center justify-between gap-4">
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          {status.kind === "idle"
-            ? hasResults
-              ? `Latest saved Run: ${formatCounts(initialPassed, initialFailed)}`
-              : "Run your code against the hidden tests."
-            : runLabel(status)}
-        </p>
-        <button
-          type="button"
-          onClick={handleRun}
-          disabled={busy}
-          className={`${pillButtonClassName} disabled:cursor-not-allowed disabled:opacity-50`}
-        >
-          Run
-        </button>
-      </div>
-
-      {saveFailed && (
-        <p className="text-sm text-amber-600 dark:text-amber-400">
-          The Run finished, but it could not be saved to this Session.
-        </p>
-      )}
+      </aside>
     </div>
   );
 }

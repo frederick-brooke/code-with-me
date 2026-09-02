@@ -29,7 +29,7 @@ export default async function InterviewPage({
 
   return (
     <div className="flex flex-col flex-1 items-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex w-full max-w-3xl flex-col gap-12 px-16 py-12">
+      <main className="flex w-full max-w-6xl flex-col gap-12 px-16 py-12">
         <div className="flex w-full items-center justify-between">
           <span className="text-sm font-medium">Session in progress</span>
           <SignOutButton />
