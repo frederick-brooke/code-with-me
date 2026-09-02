@@ -1,0 +1,3 @@
+# ADR-0002: Persistence seams are asynchronous
+
+Both persistence seams — the Candidate-auth store seam (`AuthStore`) and the data store seam (`DataStore`) — are async, every method returning a `Promise`, because the durable Postgres implementations that back them are inherently asynchronous. This was landed as a pure prefactor: the in-memory implementations updated to the async shape without behavior change, the auth engine (`AuthEngine`) awaits its store calls, and the whole test suite stayed green throughout. Making the seams async before introducing the database-backed stores keeps the swap invisible to callers — the auth engine and any future `SessionEngine` never know which store backs them.

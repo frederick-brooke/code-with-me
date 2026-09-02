@@ -1,6 +1,6 @@
 # code-with-me
 
-Fresh Next.js 16.3.4 scaffold — only starter template code, no custom work yet.
+Next.js 16.3.4 mock live-coding interview app: passwordless Candidate sign-in, a UI-free `SessionEngine` owning the Session lifecycle, and Postgres via Prisma 7 as the durable data layer. See `docs/adr/` for the architecture decisions; read `CONTEXT.md` for the domain vocabulary before naming anything.
 
 ## Commands
 
@@ -19,9 +19,12 @@ Fresh Next.js 16.3.4 scaffold — only starter template code, no custom work yet
 - **Tailwind CSS v4** — uses `@import "tailwindcss"` and `@theme` directive (not v3's `@tailwind`)
 - **Path alias** `@/*` maps to project root
 - **TypeScript strict mode** on, `noEmit: true`, `moduleResolution: bundler`
+- **Prisma 7** pinned to 7.10.0 (not the npm `latest` 8-rc); config in `prisma7.config.ts`, client generated into `generated/prisma` (committed), schema + migrations in `prisma/`
+- **Postgres via a driver adapter**: `@prisma/adapter-pg` wired in `lib/db/prisma.ts`; with `DATABASE_URL` set the app uses the Postgres stores, otherwise production fails fast and dev/test use in-memory stores
+- **Seams**: `AuthStore` (`lib/auth/`) and `DataStore` (`lib/data/`) are async interfaces with in-memory and Postgres implementations; `SessionEngine` (`lib/engine/`) owns the session lifecycle over the data seam
 - No custom `next.config.ts` — default empty config
-- No CI, no env files, no Docker config
-- `next-env.d.ts` and `.next/types/` are auto-generated — do not edit
+- No CI, no Docker config — env vars via `.env` / `.env.example` (dotenv-loaded by `prisma7.config.ts`); DATABASE_URL drives the store selection
+- `next-env.d.ts`, `.next/types/`, and `generated/prisma/` are auto-generated — do not edit (the generated Prisma client is committed)
 
 ## Next.js version caveat
 
