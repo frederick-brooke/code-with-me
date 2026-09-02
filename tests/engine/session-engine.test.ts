@@ -1,15 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { InMemoryDataStore } from "@/lib/data/store";
-import { seedProblems } from "@/lib/data/seeds/problems";
 import { SessionEngine, PHASE_ORDER } from "@/lib/engine/session-engine";
+import { makeSeededStore } from "@/tests/helpers/seeded-store";
 import type { DataStore } from "@/lib/data/types";
 
 function makeStore(): DataStore {
-  const store = new InMemoryDataStore();
-  for (const problem of seedProblems) {
-    store.createProblem(problem);
-  }
-  return store;
+  return makeSeededStore();
 }
 
 async function startSession(
@@ -191,5 +186,34 @@ describe("SessionEngine", () => {
       engine.recordMessage("missing", { speaker: "assessor", text: "a" }),
     ).rejects.toThrow(/Unknown session: missing/);
     await expect(engine.query("missing")).rejects.toThrow(/Unknown session: missing/);
+  });
+
+  it("lists a Candidate's saved Sessions newest first, joined with Problem titles", async () => {
+    const store = makeStore();
+    const engine = new SessionEngine(store);
+    const storeEngine = new SessionEngine(store);
+    await storeEngine.start("session-1", "candidate-1", "two-sum");
+    await new Promise((resolve) => setTimeout(resolve, 2));
+    await storeEngine.start("session-2", "candidate-1", "valid-parentheses");
+    await storeEngine.start("session-3", "candidate-2", "two-sum");
+
+    const saved = await engine.listSessionsForCandidate("candidate-1");
+    expect(saved.map((s) => s.session.id)).toEqual(["session-2", "session-1"]);
+    expect(saved.map((s) => s.problemTitle)).toEqual(["Valid Parentheses", "Two Sum"]);
+
+    const other = await engine.listSessionsForCandidate("candidate-2");
+    expect(other.map((s) => s.session.id)).toEqual(["session-3"]);
+    expect(await engine.listSessionsForCandidate("nobody")).toEqual([]);
+  });
+
+  it("returns a Session with its Problem, or null when the Session is unknown", async () => {
+    const store = makeStore();
+    const engine = new SessionEngine(store);
+    await engine.start("session-1", "candidate-1", "two-sum");
+
+    const view = await engine.getSession("session-1");
+    expect(view?.session.problemId).toBe("two-sum");
+    expect(view?.problem?.title).toBe("Two Sum");
+    expect(await engine.getSession("missing")).toBeNull();
   });
 });

@@ -43,3 +43,16 @@ export async function createDataStore(): Promise<DataStore> {
   }
   return createSeededDataStore();
 }
+
+let cachedDataStore: DataStore | undefined;
+
+/**
+ * The app-wide data store, constructed once and cached for the process.
+ * `next dev` rebuilds modules as it re-dashboards, so without the cache each
+ * request would rebuild the seeded in-memory store and a launched Session
+ * would never appear back on Home. Mirrors `getAuthEngine`.
+ */
+export async function getDataStore(): Promise<DataStore> {
+  cachedDataStore ??= await createDataStore();
+  return cachedDataStore;
+}

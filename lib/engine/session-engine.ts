@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { DataStore, Session, SessionPhase } from "@/lib/data/types";
+import type { DataStore, Problem, Session, SessionPhase } from "@/lib/data/types";
 
 export const PHASE_ORDER: SessionPhase[] = ["introduction", "solve", "wrap-up", "debrief"];
 
@@ -20,6 +20,11 @@ export interface SessionQuery {
   passedCount: number;
   failedCount: number;
   transcript: Array<{ speaker: "candidate" | "assessor"; text: string }>;
+}
+
+export interface SavedSessionView {
+  session: Session;
+  problemTitle: string;
 }
 
 export class SessionEngine {
@@ -105,6 +110,35 @@ export class SessionEngine {
       failedCount,
       transcript: messages.map((m) => ({ speaker: m.speaker, text: m.text })),
     };
+  }
+
+  /**
+   * Read projection for the UI: the Candidate's saved Sessions, newest
+   * first, joined with the chosen Problem's title.
+   */
+  async listSessionsForCandidate(candidateId: string): Promise<SavedSessionView[]> {
+    const sessions = await this.store.listSessionsByCandidate(candidateId);
+    const newestFirst = [...sessions].sort(
+      (a, b) => b.startedAt.getTime() - a.startedAt.getTime(),
+    );
+    return Promise.all(
+      newestFirst.map(async (session) => ({
+        session,
+        problemTitle:
+          (await this.store.findProblemById(session.problemId))?.title ?? session.problemId,
+      })),
+    );
+  }
+
+  /** Read projection for the UI: a Session with its Problem, or null when unknown. */
+  async getSession(
+    sessionId: string,
+  ): Promise<{ session: Session; problem: Problem | null } | null> {
+    const session = await this.store.findSessionById(sessionId);
+    if (!session) {
+      return null;
+    }
+    return { session, problem: await this.store.findProblemById(session.problemId) };
   }
 
   private async moveTo(sessionId: string, phase: SessionPhase): Promise<Session> {
