@@ -9,6 +9,7 @@
     "prebuild": "prisma generate",
     "build": "next build",
     "start": "next start",
+    "assessor:configure": "node scripts/assessor-configure.mts",
     "lint": "eslint",
     "test": "vitest run",
     "postinstall": "prisma generate"
