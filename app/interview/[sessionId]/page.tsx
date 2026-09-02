@@ -5,6 +5,7 @@ import { getDataStore } from "@/lib/data";
 import { SessionEngine } from "@/lib/engine/session-engine";
 import { SignOutButton } from "@/app/components/sign-out-button";
 import { pillButtonClassName } from "@/app/components/pill-button";
+import { SolveSurface } from "@/app/components/solve-surface";
 
 export default async function InterviewPage({
   params,
@@ -19,9 +20,12 @@ export default async function InterviewPage({
   const { sessionId } = await params;
   const engine = new SessionEngine(await getDataStore());
   const view = await engine.getSession(sessionId);
-  if (!view || view.session.candidateId !== candidate.id) {
+  if (!view || view.session.candidateId !== candidate.id || !view.problem) {
     redirect("/");
   }
+  const problem = view.problem;
+
+  const query = await engine.query(sessionId);
 
   return (
     <div className="flex flex-col flex-1 items-center bg-zinc-50 font-sans dark:bg-black">
@@ -32,17 +36,19 @@ export default async function InterviewPage({
         </div>
 
         <header className="flex flex-col gap-3">
-          <h1 className="text-3xl font-semibold tracking-tight">
-            {view.problem?.title ?? view.session.problemId}
-          </h1>
+          <h1 className="text-3xl font-semibold tracking-tight">{problem.title}</h1>
+          <p className="text-sm capitalize text-zinc-500">
+            Phase: {view.session.phase}
+          </p>
         </header>
 
-        <section className="rounded-2xl border border-black/[.08] bg-white p-6 text-sm leading-7 text-zinc-600 dark:border-white/[.145] dark:bg-black dark:text-zinc-400">
-          <p>
-            The Assessor voice conversation and the code editor arrive with the
-            interview surface. Your Session is live and stored.
-          </p>
-        </section>
+        <SolveSurface
+          sessionId={sessionId}
+          problem={problem}
+          initialCode={query.currentCode}
+          initialPassed={query.passedCount}
+          initialFailed={query.failedCount}
+        />
 
         <Link
           href="/"
