@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { authEngine, SESSION_COOKIE } from "@/lib/auth";
+import { getAuthEngine, SESSION_COOKIE } from "@/lib/auth";
 import { clearSessionCookie, createSessionCookie } from "@/lib/auth/session";
 import { isMailConfigured, loginCodeSender } from "@/lib/mail";
 import type { RequestCodeError, VerifyCodeError } from "@/lib/auth/types";
@@ -37,7 +37,7 @@ export async function requestCodeAction(
   formData: FormData,
 ): Promise<RequestCodeActionState> {
   const email = String(formData.get("email") ?? "");
-  const result = await authEngine.requestCode(email);
+  const result = await getAuthEngine().requestCode(email);
 
   if (!result.ok) {
     return { status: "error", error: result.error };
@@ -51,7 +51,7 @@ export async function resendCodeAction(
   formData: FormData,
 ): Promise<RequestCodeActionState> {
   const email = String(formData.get("email") ?? "");
-  const pending = await authEngine.getPendingCode(email);
+  const pending = await getAuthEngine().getPendingCode(email);
 
   if (!pending) {
     return { status: "error", error: "no-active-code" };
@@ -71,7 +71,7 @@ export async function verifyCodeAction(
   const email = String(formData.get("email") ?? "");
   const code = String(formData.get("code") ?? "");
 
-  const result = await authEngine.verifyCode(email, code);
+  const result = await getAuthEngine().verifyCode(email, code);
   if (!result.ok) {
     return { status: "error", error: result.error };
   }
@@ -83,7 +83,7 @@ export async function verifyCodeAction(
 export async function signOutAction(): Promise<void> {
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
   if (token) {
-    await authEngine.signOut(token);
+    await getAuthEngine().signOut(token);
   }
   await clearSessionCookie();
   redirect("/");

@@ -80,7 +80,6 @@ CREATE TABLE "PerformanceSummary" (
 -- CreateTable
 CREATE TABLE "PendingCode" (
     "email" TEXT NOT NULL,
-    "candidateId" TEXT NOT NULL,
     "code" TEXT NOT NULL,
     "expiresAt" TIMESTAMP(3) NOT NULL,
     "remainingAttempts" INTEGER NOT NULL,
@@ -119,9 +118,6 @@ ALTER TABLE "Message" ADD CONSTRAINT "Message_sessionId_fkey" FOREIGN KEY ("sess
 
 -- AddForeignKey
 ALTER TABLE "PerformanceSummary" ADD CONSTRAINT "PerformanceSummary_sessionId_fkey" FOREIGN KEY ("sessionId") REFERENCES "Session"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "PendingCode" ADD CONSTRAINT "PendingCode_candidateId_fkey" FOREIGN KEY ("candidateId") REFERENCES "Candidate"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "AuthSession" ADD CONSTRAINT "AuthSession_candidateId_fkey" FOREIGN KEY ("candidateId") REFERENCES "Candidate"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

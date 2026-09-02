@@ -168,7 +168,6 @@ export type CandidateWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Candidate"> | Date | string
   sessions?: Prisma.SessionListRelationFilter
   authSessions?: Prisma.AuthSessionListRelationFilter
-  pendingCodes?: Prisma.PendingCodeListRelationFilter
 }
 
 export type CandidateOrderByWithRelationInput = {
@@ -177,7 +176,6 @@ export type CandidateOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   sessions?: Prisma.SessionOrderByRelationAggregateInput
   authSessions?: Prisma.AuthSessionOrderByRelationAggregateInput
-  pendingCodes?: Prisma.PendingCodeOrderByRelationAggregateInput
 }
 
 export type CandidateWhereUniqueInput = Prisma.AtLeast<{
@@ -189,7 +187,6 @@ export type CandidateWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Candidate"> | Date | string
   sessions?: Prisma.SessionListRelationFilter
   authSessions?: Prisma.AuthSessionListRelationFilter
-  pendingCodes?: Prisma.PendingCodeListRelationFilter
 }, "id" | "email">
 
 export type CandidateOrderByWithAggregationInput = {
@@ -216,7 +213,6 @@ export type CandidateCreateInput = {
   createdAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutCandidateInput
   authSessions?: Prisma.AuthSessionCreateNestedManyWithoutCandidateInput
-  pendingCodes?: Prisma.PendingCodeCreateNestedManyWithoutCandidateInput
 }
 
 export type CandidateUncheckedCreateInput = {
@@ -225,7 +221,6 @@ export type CandidateUncheckedCreateInput = {
   createdAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutCandidateInput
   authSessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutCandidateInput
-  pendingCodes?: Prisma.PendingCodeUncheckedCreateNestedManyWithoutCandidateInput
 }
 
 export type CandidateUpdateInput = {
@@ -234,7 +229,6 @@ export type CandidateUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutCandidateNestedInput
   authSessions?: Prisma.AuthSessionUpdateManyWithoutCandidateNestedInput
-  pendingCodes?: Prisma.PendingCodeUpdateManyWithoutCandidateNestedInput
 }
 
 export type CandidateUncheckedUpdateInput = {
@@ -243,7 +237,6 @@ export type CandidateUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutCandidateNestedInput
   authSessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutCandidateNestedInput
-  pendingCodes?: Prisma.PendingCodeUncheckedUpdateManyWithoutCandidateNestedInput
 }
 
 export type CandidateCreateManyInput = {
@@ -309,20 +302,6 @@ export type CandidateUpdateOneRequiredWithoutSessionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.CandidateUpdateToOneWithWhereWithoutSessionsInput, Prisma.CandidateUpdateWithoutSessionsInput>, Prisma.CandidateUncheckedUpdateWithoutSessionsInput>
 }
 
-export type CandidateCreateNestedOneWithoutPendingCodesInput = {
-  create?: Prisma.XOR<Prisma.CandidateCreateWithoutPendingCodesInput, Prisma.CandidateUncheckedCreateWithoutPendingCodesInput>
-  connectOrCreate?: Prisma.CandidateCreateOrConnectWithoutPendingCodesInput
-  connect?: Prisma.CandidateWhereUniqueInput
-}
-
-export type CandidateUpdateOneRequiredWithoutPendingCodesNestedInput = {
-  create?: Prisma.XOR<Prisma.CandidateCreateWithoutPendingCodesInput, Prisma.CandidateUncheckedCreateWithoutPendingCodesInput>
-  connectOrCreate?: Prisma.CandidateCreateOrConnectWithoutPendingCodesInput
-  upsert?: Prisma.CandidateUpsertWithoutPendingCodesInput
-  connect?: Prisma.CandidateWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.CandidateUpdateToOneWithWhereWithoutPendingCodesInput, Prisma.CandidateUpdateWithoutPendingCodesInput>, Prisma.CandidateUncheckedUpdateWithoutPendingCodesInput>
-}
-
 export type CandidateCreateNestedOneWithoutAuthSessionsInput = {
   create?: Prisma.XOR<Prisma.CandidateCreateWithoutAuthSessionsInput, Prisma.CandidateUncheckedCreateWithoutAuthSessionsInput>
   connectOrCreate?: Prisma.CandidateCreateOrConnectWithoutAuthSessionsInput
@@ -342,7 +321,6 @@ export type CandidateCreateWithoutSessionsInput = {
   email: string
   createdAt?: Date | string
   authSessions?: Prisma.AuthSessionCreateNestedManyWithoutCandidateInput
-  pendingCodes?: Prisma.PendingCodeCreateNestedManyWithoutCandidateInput
 }
 
 export type CandidateUncheckedCreateWithoutSessionsInput = {
@@ -350,7 +328,6 @@ export type CandidateUncheckedCreateWithoutSessionsInput = {
   email: string
   createdAt?: Date | string
   authSessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutCandidateInput
-  pendingCodes?: Prisma.PendingCodeUncheckedCreateNestedManyWithoutCandidateInput
 }
 
 export type CandidateCreateOrConnectWithoutSessionsInput = {
@@ -374,62 +351,12 @@ export type CandidateUpdateWithoutSessionsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   authSessions?: Prisma.AuthSessionUpdateManyWithoutCandidateNestedInput
-  pendingCodes?: Prisma.PendingCodeUpdateManyWithoutCandidateNestedInput
 }
 
 export type CandidateUncheckedUpdateWithoutSessionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  authSessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutCandidateNestedInput
-  pendingCodes?: Prisma.PendingCodeUncheckedUpdateManyWithoutCandidateNestedInput
-}
-
-export type CandidateCreateWithoutPendingCodesInput = {
-  id?: string
-  email: string
-  createdAt?: Date | string
-  sessions?: Prisma.SessionCreateNestedManyWithoutCandidateInput
-  authSessions?: Prisma.AuthSessionCreateNestedManyWithoutCandidateInput
-}
-
-export type CandidateUncheckedCreateWithoutPendingCodesInput = {
-  id?: string
-  email: string
-  createdAt?: Date | string
-  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutCandidateInput
-  authSessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutCandidateInput
-}
-
-export type CandidateCreateOrConnectWithoutPendingCodesInput = {
-  where: Prisma.CandidateWhereUniqueInput
-  create: Prisma.XOR<Prisma.CandidateCreateWithoutPendingCodesInput, Prisma.CandidateUncheckedCreateWithoutPendingCodesInput>
-}
-
-export type CandidateUpsertWithoutPendingCodesInput = {
-  update: Prisma.XOR<Prisma.CandidateUpdateWithoutPendingCodesInput, Prisma.CandidateUncheckedUpdateWithoutPendingCodesInput>
-  create: Prisma.XOR<Prisma.CandidateCreateWithoutPendingCodesInput, Prisma.CandidateUncheckedCreateWithoutPendingCodesInput>
-  where?: Prisma.CandidateWhereInput
-}
-
-export type CandidateUpdateToOneWithWhereWithoutPendingCodesInput = {
-  where?: Prisma.CandidateWhereInput
-  data: Prisma.XOR<Prisma.CandidateUpdateWithoutPendingCodesInput, Prisma.CandidateUncheckedUpdateWithoutPendingCodesInput>
-}
-
-export type CandidateUpdateWithoutPendingCodesInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  sessions?: Prisma.SessionUpdateManyWithoutCandidateNestedInput
-  authSessions?: Prisma.AuthSessionUpdateManyWithoutCandidateNestedInput
-}
-
-export type CandidateUncheckedUpdateWithoutPendingCodesInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  sessions?: Prisma.SessionUncheckedUpdateManyWithoutCandidateNestedInput
   authSessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutCandidateNestedInput
 }
 
@@ -438,7 +365,6 @@ export type CandidateCreateWithoutAuthSessionsInput = {
   email: string
   createdAt?: Date | string
   sessions?: Prisma.SessionCreateNestedManyWithoutCandidateInput
-  pendingCodes?: Prisma.PendingCodeCreateNestedManyWithoutCandidateInput
 }
 
 export type CandidateUncheckedCreateWithoutAuthSessionsInput = {
@@ -446,7 +372,6 @@ export type CandidateUncheckedCreateWithoutAuthSessionsInput = {
   email: string
   createdAt?: Date | string
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutCandidateInput
-  pendingCodes?: Prisma.PendingCodeUncheckedCreateNestedManyWithoutCandidateInput
 }
 
 export type CandidateCreateOrConnectWithoutAuthSessionsInput = {
@@ -470,7 +395,6 @@ export type CandidateUpdateWithoutAuthSessionsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUpdateManyWithoutCandidateNestedInput
-  pendingCodes?: Prisma.PendingCodeUpdateManyWithoutCandidateNestedInput
 }
 
 export type CandidateUncheckedUpdateWithoutAuthSessionsInput = {
@@ -478,7 +402,6 @@ export type CandidateUncheckedUpdateWithoutAuthSessionsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutCandidateNestedInput
-  pendingCodes?: Prisma.PendingCodeUncheckedUpdateManyWithoutCandidateNestedInput
 }
 
 
@@ -489,13 +412,11 @@ export type CandidateUncheckedUpdateWithoutAuthSessionsInput = {
 export type CandidateCountOutputType = {
   sessions: number
   authSessions: number
-  pendingCodes: number
 }
 
 export type CandidateCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | CandidateCountOutputTypeCountSessionsArgs
   authSessions?: boolean | CandidateCountOutputTypeCountAuthSessionsArgs
-  pendingCodes?: boolean | CandidateCountOutputTypeCountPendingCodesArgs
 }
 
 /**
@@ -522,13 +443,6 @@ export type CandidateCountOutputTypeCountAuthSessionsArgs<ExtArgs extends runtim
   where?: Prisma.AuthSessionWhereInput
 }
 
-/**
- * CandidateCountOutputType without action
- */
-export type CandidateCountOutputTypeCountPendingCodesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.PendingCodeWhereInput
-}
-
 
 export type CandidateSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -536,7 +450,6 @@ export type CandidateSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   createdAt?: boolean
   sessions?: boolean | Prisma.Candidate$sessionsArgs<ExtArgs>
   authSessions?: boolean | Prisma.Candidate$authSessionsArgs<ExtArgs>
-  pendingCodes?: boolean | Prisma.Candidate$pendingCodesArgs<ExtArgs>
   _count?: boolean | Prisma.CandidateCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["candidate"]>
 
@@ -562,7 +475,6 @@ export type CandidateOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs 
 export type CandidateInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | Prisma.Candidate$sessionsArgs<ExtArgs>
   authSessions?: boolean | Prisma.Candidate$authSessionsArgs<ExtArgs>
-  pendingCodes?: boolean | Prisma.Candidate$pendingCodesArgs<ExtArgs>
   _count?: boolean | Prisma.CandidateCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type CandidateIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -573,7 +485,6 @@ export type $CandidatePayload<ExtArgs extends runtime.Types.Extensions.InternalA
   objects: {
     sessions: Prisma.$SessionPayload<ExtArgs>[]
     authSessions: Prisma.$AuthSessionPayload<ExtArgs>[]
-    pendingCodes: Prisma.$PendingCodePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -975,7 +886,6 @@ export interface Prisma__CandidateClient<T, Null = never, ExtArgs extends runtim
   readonly [Symbol.toStringTag]: "PrismaPromise"
   sessions<T extends Prisma.Candidate$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Candidate$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   authSessions<T extends Prisma.Candidate$authSessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Candidate$authSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuthSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  pendingCodes<T extends Prisma.Candidate$pendingCodesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Candidate$pendingCodesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PendingCodePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1446,30 +1356,6 @@ export type Candidate$authSessionsArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.AuthSessionScalarFieldEnum | Prisma.AuthSessionScalarFieldEnum[]
-}
-
-/**
- * Candidate.pendingCodes
- */
-export type Candidate$pendingCodesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the PendingCode
-   */
-  select?: Prisma.PendingCodeSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the PendingCode
-   */
-  omit?: Prisma.PendingCodeOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.PendingCodeInclude<ExtArgs> | null
-  where?: Prisma.PendingCodeWhereInput
-  orderBy?: Prisma.PendingCodeOrderByWithRelationInput | Prisma.PendingCodeOrderByWithRelationInput[]
-  cursor?: Prisma.PendingCodeWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.PendingCodeScalarFieldEnum | Prisma.PendingCodeScalarFieldEnum[]
 }
 
 /**

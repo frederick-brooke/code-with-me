@@ -35,7 +35,6 @@ model Candidate {
   createdAt  DateTime    @default(now())
   sessions   Session[]   @relation("CandidateSessions")
   authSessions AuthSession[]
-  pendingCodes PendingCode[]
 }
 
 model Problem {
@@ -90,16 +89,14 @@ model PerformanceSummary {
   createdAt DateTime @default(now())
 }
 
-// Auth rows: a single-use one-time code per Candidate email,
+// Auth rows: a single-use one-time code keyed by mailbox email,
 // and a durable auth Session keyed by its opaque token.
 model PendingCode {
-  email             String    @id
-  candidateId       String
-  candidate         Candidate @relation(fields: [candidateId], references: [id])
+  email             String   @id
   code              String
   expiresAt         DateTime
   remainingAttempts Int
-  createdAt         DateTime  @default(now())
+  createdAt         DateTime @default(now())
 }
 
 model AuthSession {

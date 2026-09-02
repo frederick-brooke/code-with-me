@@ -1124,7 +1124,6 @@ export type PerformanceSummaryScalarFieldEnum = (typeof PerformanceSummaryScalar
 
 export const PendingCodeScalarFieldEnum = {
   email: 'email',
-  candidateId: 'candidateId',
   code: 'code',
   expiresAt: 'expiresAt',
   remainingAttempts: 'remainingAttempts',

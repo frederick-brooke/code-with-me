@@ -1,7 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { cookies } from "next/headers";
-import { authEngine, SESSION_COOKIE } from "@/lib/auth";
+import { getAuthEngine, SESSION_COOKIE } from "@/lib/auth";
 import { DEFAULT_SESSION_TTL_MS } from "@/lib/auth/engine";
 import type { Candidate } from "@/lib/auth/types";
 
@@ -26,7 +26,7 @@ export async function getCurrentCandidate(): Promise<Candidate | null> {
   if (!token) {
     return null;
   }
-  return authEngine.getCandidate(token);
+  return getAuthEngine().getCandidate(token);
 }
 
 export const getCachedCurrentCandidate = cache(getCurrentCandidate);

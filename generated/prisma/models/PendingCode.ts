@@ -36,7 +36,6 @@ export type PendingCodeSumAggregateOutputType = {
 
 export type PendingCodeMinAggregateOutputType = {
   email: string | null
-  candidateId: string | null
   code: string | null
   expiresAt: Date | null
   remainingAttempts: number | null
@@ -45,7 +44,6 @@ export type PendingCodeMinAggregateOutputType = {
 
 export type PendingCodeMaxAggregateOutputType = {
   email: string | null
-  candidateId: string | null
   code: string | null
   expiresAt: Date | null
   remainingAttempts: number | null
@@ -54,7 +52,6 @@ export type PendingCodeMaxAggregateOutputType = {
 
 export type PendingCodeCountAggregateOutputType = {
   email: number
-  candidateId: number
   code: number
   expiresAt: number
   remainingAttempts: number
@@ -73,7 +70,6 @@ export type PendingCodeSumAggregateInputType = {
 
 export type PendingCodeMinAggregateInputType = {
   email?: true
-  candidateId?: true
   code?: true
   expiresAt?: true
   remainingAttempts?: true
@@ -82,7 +78,6 @@ export type PendingCodeMinAggregateInputType = {
 
 export type PendingCodeMaxAggregateInputType = {
   email?: true
-  candidateId?: true
   code?: true
   expiresAt?: true
   remainingAttempts?: true
@@ -91,7 +86,6 @@ export type PendingCodeMaxAggregateInputType = {
 
 export type PendingCodeCountAggregateInputType = {
   email?: true
-  candidateId?: true
   code?: true
   expiresAt?: true
   remainingAttempts?: true
@@ -187,7 +181,6 @@ export type PendingCodeGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inte
 
 export type PendingCodeGroupByOutputType = {
   email: string
-  candidateId: string
   code: string
   expiresAt: Date
   remainingAttempts: number
@@ -219,22 +212,18 @@ export type PendingCodeWhereInput = {
   OR?: Prisma.PendingCodeWhereInput[]
   NOT?: Prisma.PendingCodeWhereInput | Prisma.PendingCodeWhereInput[]
   email?: Prisma.StringFilter<"PendingCode"> | string
-  candidateId?: Prisma.StringFilter<"PendingCode"> | string
   code?: Prisma.StringFilter<"PendingCode"> | string
   expiresAt?: Prisma.DateTimeFilter<"PendingCode"> | Date | string
   remainingAttempts?: Prisma.IntFilter<"PendingCode"> | number
   createdAt?: Prisma.DateTimeFilter<"PendingCode"> | Date | string
-  candidate?: Prisma.XOR<Prisma.CandidateScalarRelationFilter, Prisma.CandidateWhereInput>
 }
 
 export type PendingCodeOrderByWithRelationInput = {
   email?: Prisma.SortOrder
-  candidateId?: Prisma.SortOrder
   code?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   remainingAttempts?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
-  candidate?: Prisma.CandidateOrderByWithRelationInput
 }
 
 export type PendingCodeWhereUniqueInput = Prisma.AtLeast<{
@@ -242,17 +231,14 @@ export type PendingCodeWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.PendingCodeWhereInput | Prisma.PendingCodeWhereInput[]
   OR?: Prisma.PendingCodeWhereInput[]
   NOT?: Prisma.PendingCodeWhereInput | Prisma.PendingCodeWhereInput[]
-  candidateId?: Prisma.StringFilter<"PendingCode"> | string
   code?: Prisma.StringFilter<"PendingCode"> | string
   expiresAt?: Prisma.DateTimeFilter<"PendingCode"> | Date | string
   remainingAttempts?: Prisma.IntFilter<"PendingCode"> | number
   createdAt?: Prisma.DateTimeFilter<"PendingCode"> | Date | string
-  candidate?: Prisma.XOR<Prisma.CandidateScalarRelationFilter, Prisma.CandidateWhereInput>
 }, "email">
 
 export type PendingCodeOrderByWithAggregationInput = {
   email?: Prisma.SortOrder
-  candidateId?: Prisma.SortOrder
   code?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   remainingAttempts?: Prisma.SortOrder
@@ -269,7 +255,6 @@ export type PendingCodeScalarWhereWithAggregatesInput = {
   OR?: Prisma.PendingCodeScalarWhereWithAggregatesInput[]
   NOT?: Prisma.PendingCodeScalarWhereWithAggregatesInput | Prisma.PendingCodeScalarWhereWithAggregatesInput[]
   email?: Prisma.StringWithAggregatesFilter<"PendingCode"> | string
-  candidateId?: Prisma.StringWithAggregatesFilter<"PendingCode"> | string
   code?: Prisma.StringWithAggregatesFilter<"PendingCode"> | string
   expiresAt?: Prisma.DateTimeWithAggregatesFilter<"PendingCode"> | Date | string
   remainingAttempts?: Prisma.IntWithAggregatesFilter<"PendingCode"> | number
@@ -282,12 +267,10 @@ export type PendingCodeCreateInput = {
   expiresAt: Date | string
   remainingAttempts: number
   createdAt?: Date | string
-  candidate: Prisma.CandidateCreateNestedOneWithoutPendingCodesInput
 }
 
 export type PendingCodeUncheckedCreateInput = {
   email: string
-  candidateId: string
   code: string
   expiresAt: Date | string
   remainingAttempts: number
@@ -300,12 +283,10 @@ export type PendingCodeUpdateInput = {
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   remainingAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  candidate?: Prisma.CandidateUpdateOneRequiredWithoutPendingCodesNestedInput
 }
 
 export type PendingCodeUncheckedUpdateInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  candidateId?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   remainingAttempts?: Prisma.IntFieldUpdateOperationsInput | number
@@ -314,7 +295,6 @@ export type PendingCodeUncheckedUpdateInput = {
 
 export type PendingCodeCreateManyInput = {
   email: string
-  candidateId: string
   code: string
   expiresAt: Date | string
   remainingAttempts: number
@@ -331,26 +311,14 @@ export type PendingCodeUpdateManyMutationInput = {
 
 export type PendingCodeUncheckedUpdateManyInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
-  candidateId?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   remainingAttempts?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type PendingCodeListRelationFilter = {
-  every?: Prisma.PendingCodeWhereInput
-  some?: Prisma.PendingCodeWhereInput
-  none?: Prisma.PendingCodeWhereInput
-}
-
-export type PendingCodeOrderByRelationAggregateInput = {
-  _count?: Prisma.SortOrder
-}
-
 export type PendingCodeCountOrderByAggregateInput = {
   email?: Prisma.SortOrder
-  candidateId?: Prisma.SortOrder
   code?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   remainingAttempts?: Prisma.SortOrder
@@ -363,7 +331,6 @@ export type PendingCodeAvgOrderByAggregateInput = {
 
 export type PendingCodeMaxOrderByAggregateInput = {
   email?: Prisma.SortOrder
-  candidateId?: Prisma.SortOrder
   code?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   remainingAttempts?: Prisma.SortOrder
@@ -372,7 +339,6 @@ export type PendingCodeMaxOrderByAggregateInput = {
 
 export type PendingCodeMinOrderByAggregateInput = {
   email?: Prisma.SortOrder
-  candidateId?: Prisma.SortOrder
   code?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   remainingAttempts?: Prisma.SortOrder
@@ -383,194 +349,47 @@ export type PendingCodeSumOrderByAggregateInput = {
   remainingAttempts?: Prisma.SortOrder
 }
 
-export type PendingCodeCreateNestedManyWithoutCandidateInput = {
-  create?: Prisma.XOR<Prisma.PendingCodeCreateWithoutCandidateInput, Prisma.PendingCodeUncheckedCreateWithoutCandidateInput> | Prisma.PendingCodeCreateWithoutCandidateInput[] | Prisma.PendingCodeUncheckedCreateWithoutCandidateInput[]
-  connectOrCreate?: Prisma.PendingCodeCreateOrConnectWithoutCandidateInput | Prisma.PendingCodeCreateOrConnectWithoutCandidateInput[]
-  createMany?: Prisma.PendingCodeCreateManyCandidateInputEnvelope
-  connect?: Prisma.PendingCodeWhereUniqueInput | Prisma.PendingCodeWhereUniqueInput[]
-}
-
-export type PendingCodeUncheckedCreateNestedManyWithoutCandidateInput = {
-  create?: Prisma.XOR<Prisma.PendingCodeCreateWithoutCandidateInput, Prisma.PendingCodeUncheckedCreateWithoutCandidateInput> | Prisma.PendingCodeCreateWithoutCandidateInput[] | Prisma.PendingCodeUncheckedCreateWithoutCandidateInput[]
-  connectOrCreate?: Prisma.PendingCodeCreateOrConnectWithoutCandidateInput | Prisma.PendingCodeCreateOrConnectWithoutCandidateInput[]
-  createMany?: Prisma.PendingCodeCreateManyCandidateInputEnvelope
-  connect?: Prisma.PendingCodeWhereUniqueInput | Prisma.PendingCodeWhereUniqueInput[]
-}
-
-export type PendingCodeUpdateManyWithoutCandidateNestedInput = {
-  create?: Prisma.XOR<Prisma.PendingCodeCreateWithoutCandidateInput, Prisma.PendingCodeUncheckedCreateWithoutCandidateInput> | Prisma.PendingCodeCreateWithoutCandidateInput[] | Prisma.PendingCodeUncheckedCreateWithoutCandidateInput[]
-  connectOrCreate?: Prisma.PendingCodeCreateOrConnectWithoutCandidateInput | Prisma.PendingCodeCreateOrConnectWithoutCandidateInput[]
-  upsert?: Prisma.PendingCodeUpsertWithWhereUniqueWithoutCandidateInput | Prisma.PendingCodeUpsertWithWhereUniqueWithoutCandidateInput[]
-  createMany?: Prisma.PendingCodeCreateManyCandidateInputEnvelope
-  set?: Prisma.PendingCodeWhereUniqueInput | Prisma.PendingCodeWhereUniqueInput[]
-  disconnect?: Prisma.PendingCodeWhereUniqueInput | Prisma.PendingCodeWhereUniqueInput[]
-  delete?: Prisma.PendingCodeWhereUniqueInput | Prisma.PendingCodeWhereUniqueInput[]
-  connect?: Prisma.PendingCodeWhereUniqueInput | Prisma.PendingCodeWhereUniqueInput[]
-  update?: Prisma.PendingCodeUpdateWithWhereUniqueWithoutCandidateInput | Prisma.PendingCodeUpdateWithWhereUniqueWithoutCandidateInput[]
-  updateMany?: Prisma.PendingCodeUpdateManyWithWhereWithoutCandidateInput | Prisma.PendingCodeUpdateManyWithWhereWithoutCandidateInput[]
-  deleteMany?: Prisma.PendingCodeScalarWhereInput | Prisma.PendingCodeScalarWhereInput[]
-}
-
-export type PendingCodeUncheckedUpdateManyWithoutCandidateNestedInput = {
-  create?: Prisma.XOR<Prisma.PendingCodeCreateWithoutCandidateInput, Prisma.PendingCodeUncheckedCreateWithoutCandidateInput> | Prisma.PendingCodeCreateWithoutCandidateInput[] | Prisma.PendingCodeUncheckedCreateWithoutCandidateInput[]
-  connectOrCreate?: Prisma.PendingCodeCreateOrConnectWithoutCandidateInput | Prisma.PendingCodeCreateOrConnectWithoutCandidateInput[]
-  upsert?: Prisma.PendingCodeUpsertWithWhereUniqueWithoutCandidateInput | Prisma.PendingCodeUpsertWithWhereUniqueWithoutCandidateInput[]
-  createMany?: Prisma.PendingCodeCreateManyCandidateInputEnvelope
-  set?: Prisma.PendingCodeWhereUniqueInput | Prisma.PendingCodeWhereUniqueInput[]
-  disconnect?: Prisma.PendingCodeWhereUniqueInput | Prisma.PendingCodeWhereUniqueInput[]
-  delete?: Prisma.PendingCodeWhereUniqueInput | Prisma.PendingCodeWhereUniqueInput[]
-  connect?: Prisma.PendingCodeWhereUniqueInput | Prisma.PendingCodeWhereUniqueInput[]
-  update?: Prisma.PendingCodeUpdateWithWhereUniqueWithoutCandidateInput | Prisma.PendingCodeUpdateWithWhereUniqueWithoutCandidateInput[]
-  updateMany?: Prisma.PendingCodeUpdateManyWithWhereWithoutCandidateInput | Prisma.PendingCodeUpdateManyWithWhereWithoutCandidateInput[]
-  deleteMany?: Prisma.PendingCodeScalarWhereInput | Prisma.PendingCodeScalarWhereInput[]
-}
-
-export type PendingCodeCreateWithoutCandidateInput = {
-  email: string
-  code: string
-  expiresAt: Date | string
-  remainingAttempts: number
-  createdAt?: Date | string
-}
-
-export type PendingCodeUncheckedCreateWithoutCandidateInput = {
-  email: string
-  code: string
-  expiresAt: Date | string
-  remainingAttempts: number
-  createdAt?: Date | string
-}
-
-export type PendingCodeCreateOrConnectWithoutCandidateInput = {
-  where: Prisma.PendingCodeWhereUniqueInput
-  create: Prisma.XOR<Prisma.PendingCodeCreateWithoutCandidateInput, Prisma.PendingCodeUncheckedCreateWithoutCandidateInput>
-}
-
-export type PendingCodeCreateManyCandidateInputEnvelope = {
-  data: Prisma.PendingCodeCreateManyCandidateInput | Prisma.PendingCodeCreateManyCandidateInput[]
-  skipDuplicates?: boolean
-}
-
-export type PendingCodeUpsertWithWhereUniqueWithoutCandidateInput = {
-  where: Prisma.PendingCodeWhereUniqueInput
-  update: Prisma.XOR<Prisma.PendingCodeUpdateWithoutCandidateInput, Prisma.PendingCodeUncheckedUpdateWithoutCandidateInput>
-  create: Prisma.XOR<Prisma.PendingCodeCreateWithoutCandidateInput, Prisma.PendingCodeUncheckedCreateWithoutCandidateInput>
-}
-
-export type PendingCodeUpdateWithWhereUniqueWithoutCandidateInput = {
-  where: Prisma.PendingCodeWhereUniqueInput
-  data: Prisma.XOR<Prisma.PendingCodeUpdateWithoutCandidateInput, Prisma.PendingCodeUncheckedUpdateWithoutCandidateInput>
-}
-
-export type PendingCodeUpdateManyWithWhereWithoutCandidateInput = {
-  where: Prisma.PendingCodeScalarWhereInput
-  data: Prisma.XOR<Prisma.PendingCodeUpdateManyMutationInput, Prisma.PendingCodeUncheckedUpdateManyWithoutCandidateInput>
-}
-
-export type PendingCodeScalarWhereInput = {
-  AND?: Prisma.PendingCodeScalarWhereInput | Prisma.PendingCodeScalarWhereInput[]
-  OR?: Prisma.PendingCodeScalarWhereInput[]
-  NOT?: Prisma.PendingCodeScalarWhereInput | Prisma.PendingCodeScalarWhereInput[]
-  email?: Prisma.StringFilter<"PendingCode"> | string
-  candidateId?: Prisma.StringFilter<"PendingCode"> | string
-  code?: Prisma.StringFilter<"PendingCode"> | string
-  expiresAt?: Prisma.DateTimeFilter<"PendingCode"> | Date | string
-  remainingAttempts?: Prisma.IntFilter<"PendingCode"> | number
-  createdAt?: Prisma.DateTimeFilter<"PendingCode"> | Date | string
-}
-
-export type PendingCodeCreateManyCandidateInput = {
-  email: string
-  code: string
-  expiresAt: Date | string
-  remainingAttempts: number
-  createdAt?: Date | string
-}
-
-export type PendingCodeUpdateWithoutCandidateInput = {
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  code?: Prisma.StringFieldUpdateOperationsInput | string
-  expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  remainingAttempts?: Prisma.IntFieldUpdateOperationsInput | number
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-}
-
-export type PendingCodeUncheckedUpdateWithoutCandidateInput = {
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  code?: Prisma.StringFieldUpdateOperationsInput | string
-  expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  remainingAttempts?: Prisma.IntFieldUpdateOperationsInput | number
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-}
-
-export type PendingCodeUncheckedUpdateManyWithoutCandidateInput = {
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  code?: Prisma.StringFieldUpdateOperationsInput | string
-  expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  remainingAttempts?: Prisma.IntFieldUpdateOperationsInput | number
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-}
-
 
 
 export type PendingCodeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   email?: boolean
-  candidateId?: boolean
   code?: boolean
   expiresAt?: boolean
   remainingAttempts?: boolean
   createdAt?: boolean
-  candidate?: boolean | Prisma.CandidateDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["pendingCode"]>
 
 export type PendingCodeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   email?: boolean
-  candidateId?: boolean
   code?: boolean
   expiresAt?: boolean
   remainingAttempts?: boolean
   createdAt?: boolean
-  candidate?: boolean | Prisma.CandidateDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["pendingCode"]>
 
 export type PendingCodeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   email?: boolean
-  candidateId?: boolean
   code?: boolean
   expiresAt?: boolean
   remainingAttempts?: boolean
   createdAt?: boolean
-  candidate?: boolean | Prisma.CandidateDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["pendingCode"]>
 
 export type PendingCodeSelectScalar = {
   email?: boolean
-  candidateId?: boolean
   code?: boolean
   expiresAt?: boolean
   remainingAttempts?: boolean
   createdAt?: boolean
 }
 
-export type PendingCodeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"email" | "candidateId" | "code" | "expiresAt" | "remainingAttempts" | "createdAt", ExtArgs["result"]["pendingCode"]>
-export type PendingCodeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  candidate?: boolean | Prisma.CandidateDefaultArgs<ExtArgs>
-}
-export type PendingCodeIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  candidate?: boolean | Prisma.CandidateDefaultArgs<ExtArgs>
-}
-export type PendingCodeIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  candidate?: boolean | Prisma.CandidateDefaultArgs<ExtArgs>
-}
+export type PendingCodeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"email" | "code" | "expiresAt" | "remainingAttempts" | "createdAt", ExtArgs["result"]["pendingCode"]>
 
 export type $PendingCodePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "PendingCode"
-  objects: {
-    candidate: Prisma.$CandidatePayload<ExtArgs>
-  }
+  objects: {}
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     email: string
-    candidateId: string
     code: string
     expiresAt: Date
     remainingAttempts: number
@@ -969,7 +788,6 @@ readonly fields: PendingCodeFieldRefs;
  */
 export interface Prisma__PendingCodeClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  candidate<T extends Prisma.CandidateDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CandidateDefaultArgs<ExtArgs>>): Prisma.Prisma__CandidateClient<runtime.Types.Result.GetResult<Prisma.$CandidatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1000,7 +818,6 @@ export interface Prisma__PendingCodeClient<T, Null = never, ExtArgs extends runt
  */
 export interface PendingCodeFieldRefs {
   readonly email: Prisma.FieldRef<"PendingCode", 'String'>
-  readonly candidateId: Prisma.FieldRef<"PendingCode", 'String'>
   readonly code: Prisma.FieldRef<"PendingCode", 'String'>
   readonly expiresAt: Prisma.FieldRef<"PendingCode", 'DateTime'>
   readonly remainingAttempts: Prisma.FieldRef<"PendingCode", 'Int'>
@@ -1022,10 +839,6 @@ export type PendingCodeFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.PendingCodeOmit<ExtArgs> | null
   /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.PendingCodeInclude<ExtArgs> | null
-  /**
    * Filter, which PendingCode to fetch.
    */
   where: Prisma.PendingCodeWhereUniqueInput
@@ -1044,10 +857,6 @@ export type PendingCodeFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Exten
    */
   omit?: Prisma.PendingCodeOmit<ExtArgs> | null
   /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.PendingCodeInclude<ExtArgs> | null
-  /**
    * Filter, which PendingCode to fetch.
    */
   where: Prisma.PendingCodeWhereUniqueInput
@@ -1065,10 +874,6 @@ export type PendingCodeFindFirstArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the PendingCode
    */
   omit?: Prisma.PendingCodeOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.PendingCodeInclude<ExtArgs> | null
   /**
    * Filter, which PendingCode to fetch.
    */
@@ -1118,10 +923,6 @@ export type PendingCodeFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extens
    */
   omit?: Prisma.PendingCodeOmit<ExtArgs> | null
   /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.PendingCodeInclude<ExtArgs> | null
-  /**
    * Filter, which PendingCode to fetch.
    */
   where?: Prisma.PendingCodeWhereInput
@@ -1169,10 +970,6 @@ export type PendingCodeFindManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the PendingCode
    */
   omit?: Prisma.PendingCodeOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.PendingCodeInclude<ExtArgs> | null
   /**
    * Filter, which PendingCodes to fetch.
    */
@@ -1222,10 +1019,6 @@ export type PendingCodeCreateArgs<ExtArgs extends runtime.Types.Extensions.Inter
    */
   omit?: Prisma.PendingCodeOmit<ExtArgs> | null
   /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.PendingCodeInclude<ExtArgs> | null
-  /**
    * The data needed to create a PendingCode.
    */
   data: Prisma.XOR<Prisma.PendingCodeCreateInput, Prisma.PendingCodeUncheckedCreateInput>
@@ -1259,10 +1052,6 @@ export type PendingCodeCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Ext
    */
   data: Prisma.PendingCodeCreateManyInput | Prisma.PendingCodeCreateManyInput[]
   skipDuplicates?: boolean
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.PendingCodeIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1277,10 +1066,6 @@ export type PendingCodeUpdateArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the PendingCode
    */
   omit?: Prisma.PendingCodeOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.PendingCodeInclude<ExtArgs> | null
   /**
    * The data needed to update a PendingCode.
    */
@@ -1333,10 +1118,6 @@ export type PendingCodeUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Ext
    * Limit how many PendingCodes to update.
    */
   limit?: number
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.PendingCodeIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1351,10 +1132,6 @@ export type PendingCodeUpsertArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the PendingCode
    */
   omit?: Prisma.PendingCodeOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.PendingCodeInclude<ExtArgs> | null
   /**
    * The filter to search for the PendingCode to update in case it exists.
    */
@@ -1381,10 +1158,6 @@ export type PendingCodeDeleteArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the PendingCode
    */
   omit?: Prisma.PendingCodeOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.PendingCodeInclude<ExtArgs> | null
   /**
    * Filter which PendingCode to delete.
    */
@@ -1417,8 +1190,4 @@ export type PendingCodeDefaultArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Omit specific fields from the PendingCode
    */
   omit?: Prisma.PendingCodeOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.PendingCodeInclude<ExtArgs> | null
 }
