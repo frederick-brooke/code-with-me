@@ -11,7 +11,7 @@ export const seedProblems: Problem[] = [
     hintTiers: [
       "First, say out loud what has to be true for a pair of numbers to be the answer: two values at different positions that add up to the target. Restate the problem in plain words before you touch code.",
       "Think about each number as you scan the list: if you're looking at `nums[i]`, what would its partner have to be? Something like `target - nums[i]`. Ask yourself whether you could remember where you saw a matching value before, in a way you can look up quickly.",
-      "This one is a classic hash map problem. As you scan left to right, remember each value alongside its index, and at every position check whether its missing partner is already remembered. Choosing the right lookup structure is the whole bottleneck — the runtime comes down to how you store what you've seen.",
+      "This is the classic hash map problem. The key insight is that you don't need to search the whole list for a partner — you can remember each value you've seen and where it sat, so every later element can ask 'have I seen my partner?'. Deciding exactly what the map stores, and what you do the moment a partner is found, is the remaining work.",
     ],
     sampleTests: [
       { input: "[2, 7, 11, 15], 9", expectedOutput: "[0, 1]" },
@@ -34,7 +34,7 @@ export const seedProblems: Problem[] = [
     hintTiers: [
       "Think about what validity actually requires: every closing bracket has to match the most recent opening bracket that hasn't been closed yet, and every opening bracket eventually gets closed. Start by describing that process in words.",
       "A closing bracket must pair with the last unmatched opening bracket — not just any opening of the same kind. What data structure gives you exactly 'last in, first out'? Think about what should happen to an opening bracket the moment its match closes.",
-      "This is the classic stack problem: push each opening bracket as you meet it, and when you meet a closing bracket, pop the top and check it matches. Anything that breaks that order, or leaves the stack non-empty at the end, is invalid.",
+      "This is the classic stack problem. The insight is that openings nest, so 'most recent' is exactly what a stack keeps on top — a closing bracket must match whatever is currently on the stack. The remaining decisions are yours: what counts as a mismatch, and what does the stack tell you at the very end?",
     ],
     sampleTests: [
       { input: '"()"', expectedOutput: "True" },
@@ -57,7 +57,7 @@ export const seedProblems: Problem[] = [
     hintTiers: [
       "Water can only rest on top of a bar when there are taller bars on both sides of it. Before thinking about totals, answer the smaller question: for one single bar, what decides how much water sits on it?",
       "For any bar, the water above it is the shorter of the tallest bar to its left and the tallest bar to its right, minus the bar's own height. So the real sub-problem is: can you know, for every position, the tallest bar seen so far on each side?",
-      "The usual structure is a two-pointer pass: track the highest bar seen from each side and always advance the pointer that's under the lower maximum, adding the difference as you go. An equivalent, plainer structure is computing left-highest and right-highest arrays first, then summing the per-bar deltas.",
+      "The standard shape is a two-pointer sweep with one high-water mark from each side — always advance the side under the lower mark, because that side decides how much water that bar can hold. Try that, or the plainer two-pass form where you precompute each bar's tallest-left and tallest-right, then sum the per-bar deltas yourself.",
     ],
     sampleTests: [
       { input: "[0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1]", expectedOutput: "6" },

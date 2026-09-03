@@ -230,7 +230,7 @@ export class SessionEngine {
     return this.updateActiveSession(sessionId, {});
   }
 
-  /** Candidate activity only: Working Code saves, Runs, and Candidate turns. */
+  /** Candidate activity only: Working Code saves, Runs, Candidate turns, and Hint requests. */
   private async updateActiveSession(
     sessionId: string,
     patch: { workingCode?: string; hintsGiven?: number },
