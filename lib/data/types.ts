@@ -36,6 +36,8 @@ export interface Session {
   phase: SessionPhase;
   startedAt: Date;
   endedAt: Date | null;
+  workingCode: string | null;
+  lastActivityAt: Date | null;
 }
 
 export interface Run {

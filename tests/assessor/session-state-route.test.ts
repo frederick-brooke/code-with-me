@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GET as getSessionState } from "@/app/api/assessor/session-state/[sessionId]/route";
 import { getDataStore } from "@/lib/data";
+import { InMemoryDataStore } from "@/lib/data/store";
 import { SessionEngine } from "@/lib/engine/session-engine";
 
 const originalEnv = { ...process.env };
@@ -15,13 +16,16 @@ function makeRequest(secret: string | null, url = "http://localhost/api/assessor
 
 beforeEach(async () => {
   const store = await getDataStore();
-  const engine = new SessionEngine(store);
-  await engine.start("session-1", "candidate-1", "two-sum");
+  if (store instanceof InMemoryDataStore) {
+    store.reset();
+  }
+  await new SessionEngine(store).start("session-1", "candidate-1", "two-sum");
 });
 
 afterEach(() => {
   process.env = { ...originalEnv };
   vi.unstubAllEnvs();
+  vi.useRealTimers();
 });
 
 describe("GET /api/assessor/session-state/[sessionId]", () => {
@@ -57,11 +61,56 @@ describe("GET /api/assessor/session-state/[sessionId]", () => {
     expect(response.status).toBe(200);
 
     const body = (await response.json()) as {
-      data: { currentCode: string; passedCount: number; failedCount: number };
+      data: {
+        currentCode: string;
+        passedCount: number;
+        failedCount: number;
+        runCount: number;
+        lastRunSecondsAgo: number | null;
+        lastActivitySecondsAgo: number | null;
+      };
     };
     expect(body.data.currentCode).toBe("def two_sum(nums, target):\n    return []");
     expect(body.data.passedCount).toBe(2);
     expect(body.data.failedCount).toBe(2);
+    expect(body.data.runCount).toBe(1);
+    expect(typeof body.data.lastRunSecondsAgo).toBe("number");
+    expect(typeof body.data.lastActivitySecondsAgo).toBe("number");
+  });
+
+  it("returns the Working Code snapshot and recency signals that grow with time", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
+    vi.stubEnv("ASSESSOR_TOOL_SECRET", "secret-123");
+    const store = await getDataStore();
+    const engine = new SessionEngine(store);
+    await engine.saveWorkingCode("session-1", "def two_sum(nums, target):\n    return [0, 1]\n");
+    await engine.recordRun("session-1", {
+      code: "def two_sum(nums, target):\n    return []",
+      passedCount: 1,
+      failedCount: 1,
+    });
+    vi.advanceTimersByTime(4000);
+
+    const response = await getSessionState(makeRequest("secret-123"), {
+      params: Promise.resolve({ sessionId: "session-1" }),
+    });
+    expect(response.status).toBe(200);
+
+    const body = (await response.json()) as {
+      data: {
+        phase: string;
+        currentCode: string;
+        runCount: number;
+        lastRunSecondsAgo: number;
+        lastActivitySecondsAgo: number;
+      };
+    };
+    expect(body.data.currentCode).toBe("def two_sum(nums, target):\n    return [0, 1]\n");
+    expect(body.data.runCount).toBe(1);
+    expect(body.data.lastRunSecondsAgo).toBe(4);
+    expect(body.data.lastActivitySecondsAgo).toBe(4);
+    expect(body.data.phase).toBe("introduction");
   });
 
   it("returns 404 for an unknown Session", async () => {

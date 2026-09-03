@@ -108,4 +108,13 @@ export class InMemoryDataStore implements DataStore {
     }
     return null;
   }
+
+  /** Clears every volatile record, keeping the seeded Problems. Dev/test helper. */
+  reset(): void {
+    this.candidates.clear();
+    this.sessions.clear();
+    this.runs.clear();
+    this.messages.clear();
+    this.summaries.clear();
+  }
 }

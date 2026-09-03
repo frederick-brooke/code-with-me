@@ -220,6 +220,63 @@ describe("SessionEngine", () => {
     expect(query.currentCode).toBe("def two_sum(nums, target):\n    pass\n");
     expect(query.passedCount).toBe(0);
     expect(query.failedCount).toBe(0);
+    expect(query.runCount).toBe(0);
+    expect(query.lastRunAt).toBeNull();
+    expect(query.lastActivityAt).toBeNull();
+  });
+
+  it("saves Working Code as a durable snapshot with recency through the query surface", async () => {
+    const store = makeStore();
+    const engine = new SessionEngine(store);
+    await startSession(store);
+
+    await engine.saveWorkingCode("session-1", "def two_sum(nums, target):\n    return [0, 1]\n");
+
+    const query = await engine.query("session-1");
+    expect(query.currentCode).toBe("def two_sum(nums, target):\n    return [0, 1]\n");
+    expect(query.lastActivityAt).toBeInstanceOf(Date);
+
+    const persisted = await store.findSessionById("session-1");
+    expect(persisted?.workingCode).toBe("def two_sum(nums, target):\n    return [0, 1]\n");
+    expect(persisted?.lastActivityAt).toBeInstanceOf(Date);
+  });
+
+  it("prefers the Working Code snapshot over the last Run as currentCode", async () => {
+    const store = makeStore();
+    const engine = new SessionEngine(store);
+    await startSession(store);
+
+    await engine.recordRun("session-1", { code: "def two_sum(nums, target):\n    pass\n", passedCount: 0, failedCount: 2 });
+    await engine.saveWorkingCode("session-1", "def two_sum(nums, target):\n    return [0, 1]\n");
+
+    const query = await engine.query("session-1");
+    expect(query.currentCode).toBe("def two_sum(nums, target):\n    return [0, 1]\n");
+    expect(query.runCount).toBe(1);
+    expect(query.lastRunAt).toBeInstanceOf(Date);
+    expect(query.lastActivityAt).toBeInstanceOf(Date);
+    expect(query.passedCount).toBe(0);
+    expect(query.failedCount).toBe(2);
+  });
+
+  it("touches lastActivityAt on Candidate activity only, never on Assessor turns", async () => {
+    const store = makeStore();
+    const engine = new SessionEngine(store);
+    await startSession(store);
+
+    await engine.recordMessage("session-1", { speaker: "assessor", text: "Let's begin." });
+    const afterAssessor = await store.findSessionById("session-1");
+    expect(afterAssessor?.lastActivityAt).toBeNull();
+
+    await engine.recordMessage("session-1", { speaker: "candidate", text: "I have a question." });
+    const afterCandidate = await store.findSessionById("session-1");
+    expect(afterCandidate?.lastActivityAt).toBeInstanceOf(Date);
+
+    await engine.recordRun("session-1", { code: "x = 1", passedCount: 1, failedCount: 0 });
+    const afterRun = await store.findSessionById("session-1");
+    expect(afterRun?.lastActivityAt).toBeInstanceOf(Date);
+    expect((afterRun?.lastActivityAt as Date).getTime()).toBeGreaterThanOrEqual(
+      (afterCandidate?.lastActivityAt as Date).getTime(),
+    );
   });
 
   it("returns the latest Run's code and counts as the query surface", async () => {

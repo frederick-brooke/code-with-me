@@ -3,12 +3,12 @@
 import CodeMirror from "@uiw/react-codemirror";
 import { python } from "@codemirror/lang-python";
 import { oneDark } from "@codemirror/theme-one-dark";
-import { useEffect, useState, type ReactNode, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, type ReactNode, useSyncExternalStore } from "react";
 import type { Problem } from "@/lib/data/types";
 import { extractFunctionName } from "@/lib/run/function-name";
 import { executeRun, ensurePyodideReady } from "@/lib/run/pyodide";
 import type { RunResult } from "@/lib/run/result";
-import { recordRunAction } from "@/app/actions/sessions";
+import { recordRunAction, saveWorkingCodeAction } from "@/app/actions/sessions";
 import { pillButtonClassName } from "@/app/components/pill-button";
 
 function usePrefersDark(): boolean {
@@ -49,6 +49,8 @@ type RunStatus =
   | { kind: "complete"; result: RunResult }
   | { kind: "error"; message: string };
 
+const WORKING_CODE_AUTOSAVE_MS = 2000;
+
 export function SolveSurface({
   sessionId,
   problem,
@@ -67,13 +69,31 @@ export function SolveSurface({
   const [status, setStatus] = useState<RunStatus>({ kind: "preparing" });
   const [busy, setBusy] = useState(false);
   const [saveFailed, setSaveFailed] = useState(false);
+  const [autosaveFailed, setAutosaveFailed] = useState(false);
   const hasResults = initialPassed > 0 || initialFailed > 0;
+  const firstRender = useRef(true);
 
   useEffect(() => {
     ensurePyodideReady()
       .then(() => setStatus({ kind: "idle" }))
       .catch(() => setStatus({ kind: "error", message: "The Python runtime could not load." }));
   }, []);
+
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const saved = await saveWorkingCodeAction(sessionId, code);
+        setAutosaveFailed(!saved.ok);
+      } catch {
+        setAutosaveFailed(true);
+      }
+    }, WORKING_CODE_AUTOSAVE_MS);
+    return () => clearTimeout(timer);
+  }, [code, sessionId]);
 
   async function handleRun() {
     if (busy) {
@@ -153,6 +173,12 @@ export function SolveSurface({
         {saveFailed && (
           <p className="text-sm text-amber-600 dark:text-amber-400">
             The Run finished, but it could not be saved to this Session.
+          </p>
+        )}
+
+        {autosaveFailed && (
+          <p className="text-sm text-amber-600 dark:text-amber-400">
+            Your Working Code could not be autosaved to this Session.
           </p>
         )}
       </div>

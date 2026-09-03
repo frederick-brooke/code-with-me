@@ -51,17 +51,19 @@ model Problem {
 }
 
 model Session {
-  id          String              @id @default(uuid())
-  candidateId String
-  problemId   String
-  phase       SessionPhase        @default(introduction)
-  startedAt   DateTime            @default(now())
-  endedAt     DateTime?
-  candidate   Candidate           @relation("CandidateSessions", fields: [candidateId], references: [id])
-  problem     Problem             @relation(fields: [problemId], references: [id])
-  runs        Run[]
-  messages    Message[]
-  summary     PerformanceSummary?
+  id             String              @id @default(uuid())
+  candidateId    String
+  problemId      String
+  phase          SessionPhase        @default(introduction)
+  startedAt      DateTime            @default(now())
+  endedAt        DateTime?
+  workingCode    String?
+  lastActivityAt DateTime?
+  candidate      Candidate           @relation("CandidateSessions", fields: [candidateId], references: [id])
+  problem        Problem             @relation(fields: [problemId], references: [id])
+  runs           Run[]
+  messages       Message[]
+  summary        PerformanceSummary?
 }
 
 model Run {

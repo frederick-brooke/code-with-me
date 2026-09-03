@@ -1,6 +1,24 @@
 import "dotenv/config";
+import { readFileSync } from "node:fs";
 
 const API = "https://api.elevenlabs.io";
+
+/**
+ * Patient turn settings (ADR-0006): wait on real silence, don't barrel into the
+ * Candidate mid-thought. The platform default turn_timeout is 7s.
+ */
+const TURN_SETTINGS = { turn_timeout: 12, turn_eagerness: "patient" } as const;
+
+/**
+ * The conversation's ceiling in seconds. The platform default of 600 would cut
+ * a live interview off mid-Implementation, so raise it to 30 minutes.
+ */
+const MAX_DURATION_SECS = 1800;
+
+/** Loads the repo-versioned guiding system prompt applied to the agent. */
+function systemPromptText(): string {
+  return readFileSync(new URL("./assessor-system-prompt.md", import.meta.url), "utf8");
+}
 
 interface ToolEntry {
   id: string;
@@ -19,7 +37,7 @@ const TOOLS: WebhookToolSpec[] = [
   {
     name: "get_session_state",
     description:
-      "Returns the Candidate's current code and their latest visible Run pass/fail counts for the active Session. Call it whenever the Candidate asks about their code or progress, before answering.",
+      "Returns the Candidate's current working code, their latest visible Run pass/fail counts, how many Runs they have made, how recently the last Run and last activity happened, and the current phase for the active Session. Call it before every speaking turn so you always speak from the Candidate's actual state.",
     path: "/api/assessor/session-state/{session_id}",
     method: "GET",
   },
@@ -154,18 +172,15 @@ async function attachToolsToAgent(agentId: string, toolIds: string[]): Promise<v
   };
   const prompt = agent.conversation_config?.agent?.prompt;
   const existingIds = prompt?.tool_ids ?? [];
-  const toolIdsToAdd = toolIds.filter((id) => !existingIds.includes(id));
-  if (toolIdsToAdd.length === 0) {
-    console.log(`Agent already has all tools attached`);
-    return;
-  }
+  const newToolIds = [...new Set([...existingIds, ...toolIds])];
+  const justAttached = toolIds.filter((id) => !existingIds.includes(id));
 
-  const newToolIds = [...existingIds, ...toolIdsToAdd];
   const existingPlaceholders =
     agent.conversation_config?.agent?.dynamic_variables?.dynamic_variable_placeholders ?? {};
   const placeholders = {
     session_id: "550e8400-e29b-41d4-a716-446655440000",
     problem_statement: "Return the indices of the two numbers that add up to target.",
+    sample_tests: JSON.stringify([{ input: "[2, 7, 11, 15], 9", expectedOutput: "[0, 1]" }]),
     starter_template: "def two_sum(nums, target):\n    pass\n",
     ...existingPlaceholders,
   };
@@ -175,31 +190,53 @@ async function attachToolsToAgent(agentId: string, toolIds: string[]): Promise<v
     body: JSON.stringify({
       conversation_config: {
         agent: {
-          prompt: { tool_ids: newToolIds },
+          prompt: { tool_ids: newToolIds, prompt: systemPromptText() },
           dynamic_variables: { dynamic_variable_placeholders: placeholders },
         },
+        turn: TURN_SETTINGS,
+        conversation: { max_duration_seconds: MAX_DURATION_SECS },
       },
     }),
   });
   if (!patch.ok) {
-    throw new Error(`Failed to attach tools: HTTP ${patch.status} ${JSON.stringify(patch.body)}`);
+    throw new Error(`Failed to apply agent config: HTTP ${patch.status} ${JSON.stringify(patch.body)}`);
   }
-  console.log(`Attached ${toolIdsToAdd.join(", ")} to agent ${agentId} (now ${newToolIds.length} tools)`);
+  if (justAttached.length > 0) {
+    console.log(`Attached ${justAttached.join(", ")} to agent ${agentId} (now ${newToolIds.length} tools)`);
+  } else {
+    console.log(`Tools already attached; re-applied agent prompt and conversation settings`);
+  }
 
   const verify = await apiJson(`/v1/convai/agents/${agentId}`);
   const after = verify.body as {
     conversation_config?: {
       agent?: { prompt?: { tool_ids?: string[]; prompt?: string } };
+      turn?: { turn_timeout?: number; turn_eagerness?: string };
+      conversation?: { max_duration_seconds?: number };
     };
   };
   const afterPrompt = after.conversation_config?.agent?.prompt;
+  const afterTurn = after.conversation_config?.turn;
+  const afterConversation = after.conversation_config?.conversation;
   if (!afterPrompt || !toolIds.every((id) => afterPrompt.tool_ids?.includes(id))) {
     throw new Error("Verification failed: tool ids are not present on the agent after PATCH");
   }
   if (typeof afterPrompt.prompt !== "string" || afterPrompt.prompt.length === 0) {
-    console.warn("WARNING: the agent's system prompt text appears empty after PATCH; check the agent config.");
-  } else {
-    console.log(`Verified: agent has all tools and a system prompt (${afterPrompt.prompt.length} chars)`);
+    throw new Error("Verification failed: the agent's system prompt text is empty after PATCH");
+  }
+  console.log(`Verified: agent has all tools and a system prompt (${afterPrompt.prompt.length} chars)`);
+  if (
+    afterTurn?.turn_timeout !== TURN_SETTINGS.turn_timeout ||
+    afterTurn?.turn_eagerness !== TURN_SETTINGS.turn_eagerness
+  ) {
+    throw new Error(
+      `Verification failed: patient turn settings not applied. Expected ${JSON.stringify(TURN_SETTINGS)}, got ${JSON.stringify(afterTurn)}.`,
+    );
+  }
+  if (afterConversation?.max_duration_seconds !== MAX_DURATION_SECS) {
+    throw new Error(
+      `Verification failed: max_duration_seconds is ${String(afterConversation?.max_duration_seconds)}, expected ${MAX_DURATION_SECS}.`,
+    );
   }
 }
 

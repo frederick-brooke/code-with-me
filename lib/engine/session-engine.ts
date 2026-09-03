@@ -26,6 +26,9 @@ export interface SessionQuery {
   currentCode: string;
   passedCount: number;
   failedCount: number;
+  runCount: number;
+  lastRunAt: Date | null;
+  lastActivityAt: Date | null;
   transcript: Array<{ speaker: "candidate" | "assessor"; text: string }>;
 }
 
@@ -66,6 +69,8 @@ export class SessionEngine {
       phase: "introduction",
       startedAt: new Date(),
       endedAt: null,
+      workingCode: null,
+      lastActivityAt: null,
     };
     return this.store.createSession(session);
   }
@@ -81,7 +86,7 @@ export class SessionEngine {
       failedCount: run.failedCount,
       createdAt: new Date(),
     });
-    return this.requireActiveSession(sessionId);
+    return this.touchActivity(sessionId);
   }
 
   /** Appends a transcript line to a Session. */
@@ -94,7 +99,21 @@ export class SessionEngine {
       text: message.text,
       createdAt: new Date(),
     });
+    if (message.speaker === "candidate") {
+      return this.touchActivity(sessionId);
+    }
     return this.requireActiveSession(sessionId);
+  }
+
+  /**
+   * Saves the Candidate's Working Code as a debounced snapshot so the Assessor
+   * can read where they actually are without reacting to every keystroke. The
+   * snapshot is durable on the Session (survives reload) and distinct from a
+   * Run's immutable snapshot; it also marks the Session as having activity.
+   */
+  async saveWorkingCode(sessionId: string, code: string): Promise<Session> {
+    await this.requireActiveSession(sessionId);
+    return this.updateActiveSession(sessionId, { workingCode: code });
   }
 
   /**
@@ -152,7 +171,7 @@ export class SessionEngine {
     const messages = await this.store.listMessagesBySession(sessionId);
 
     const lastRun = runs.at(-1);
-    const currentCode = lastRun?.code ?? problem?.starterTemplate ?? "";
+    const currentCode = session.workingCode ?? lastRun?.code ?? problem?.starterTemplate ?? "";
     const passedCount = lastRun?.passedCount ?? 0;
     const failedCount = lastRun?.failedCount ?? 0;
 
@@ -161,6 +180,9 @@ export class SessionEngine {
       currentCode,
       passedCount,
       failedCount,
+      runCount: runs.length,
+      lastRunAt: lastRun?.createdAt ?? null,
+      lastActivityAt: session.lastActivityAt,
       transcript: messages.map((m) => ({ speaker: m.speaker, text: m.text })),
     };
   }
@@ -198,6 +220,23 @@ export class SessionEngine {
     const session = await this.requireActiveSession(sessionId);
     const endedAt = session.endedAt ?? (phase === "debrief" ? new Date() : null);
     return this.store.updateSession({ ...session, phase, endedAt });
+  }
+
+  private async touchActivity(sessionId: string): Promise<Session> {
+    return this.updateActiveSession(sessionId, {});
+  }
+
+  /** Candidate activity only: Working Code saves, Runs, and Candidate turns. */
+  private async updateActiveSession(
+    sessionId: string,
+    patch: { workingCode?: string },
+  ): Promise<Session> {
+    const session = await this.requireActiveSession(sessionId);
+    return this.store.updateSession({
+      ...session,
+      workingCode: patch.workingCode ?? session.workingCode,
+      lastActivityAt: new Date(),
+    });
   }
 
   private async requireActiveSession(sessionId: string): Promise<Session> {

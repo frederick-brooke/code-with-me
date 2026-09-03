@@ -102,6 +102,8 @@ function toSession(row: SessionRow): Session {
     phase: PHASE_FROM_PRISMA[row.phase],
     startedAt: row.startedAt,
     endedAt: row.endedAt,
+    workingCode: row.workingCode,
+    lastActivityAt: row.lastActivityAt,
   };
 }
 
@@ -196,6 +198,8 @@ export class PostgresDataStore implements DataStore {
         phase: PHASE_TO_PRISMA[session.phase],
         startedAt: session.startedAt,
         endedAt: session.endedAt,
+        workingCode: session.workingCode,
+        lastActivityAt: session.lastActivityAt,
       },
     });
     return toSession(row);
@@ -213,6 +217,8 @@ export class PostgresDataStore implements DataStore {
         phase: PHASE_TO_PRISMA[session.phase],
         startedAt: session.startedAt,
         endedAt: session.endedAt,
+        workingCode: session.workingCode,
+        lastActivityAt: session.lastActivityAt,
       },
     });
     return toSession(row);

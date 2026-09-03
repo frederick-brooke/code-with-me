@@ -10,17 +10,20 @@ const twoSum: Problem = {
   starterTemplate: "def two_sum(nums, target):\n    pass\n",
   sampleTests: [{ input: "[2, 7, 11, 15], 9", expectedOutput: "[0, 1]" }],
   hiddenTests: [
-    { input: "[1, 5, 3], 4", expectedOutput: "[0, 2]" },
-    { input: "[3, 3], 6", expectedOutput: "[0, 1]" },
+    { input: "[4, 1, 4], 5", expectedOutput: "[0, 2]" },
+    { input: "[0, 6, 0], 6", expectedOutput: "[0, 2]" },
   ],
 };
 
 describe("buildAssessorContext", () => {
-  it("injects the Problem statement and starter template as static context", () => {
+  it("injects the Problem statement, sample tests and starter template as static context", () => {
     const context = buildAssessorContext(twoSum, "session-1");
 
     expect(context.session_id).toBe("session-1");
     expect(context.problem_statement).toBe(twoSum.statement);
+    expect(context.sample_tests).toBe(
+      JSON.stringify([{ input: "[2, 7, 11, 15], 9", expectedOutput: "[0, 1]" }]),
+    );
     expect(context.starter_template).toBe(twoSum.starterTemplate);
   });
 

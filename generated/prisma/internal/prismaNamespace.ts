@@ -1083,7 +1083,9 @@ export const SessionScalarFieldEnum = {
   problemId: 'problemId',
   phase: 'phase',
   startedAt: 'startedAt',
-  endedAt: 'endedAt'
+  endedAt: 'endedAt',
+  workingCode: 'workingCode',
+  lastActivityAt: 'lastActivityAt'
 } as const
 
 export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]
