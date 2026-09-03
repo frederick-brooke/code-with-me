@@ -19,3 +19,9 @@ The agent is configured in the ElevenLabs dashboard for the tenant agent id in `
 - **Webhook tool** `set_phase`:
   - Method `POST`, URL `https://<APP_URL>/api/assessor/phase/{session_id}`, body `{ "phase": "approach" }` naming one of the five arc phases or `debrief`.
   - The same static `x-assessor-tool-secret` header.
+- **Webhook tool** `end_session`:
+  - Method `POST`, URL `https://<APP_URL>/api/assessor/end/{session_id}`.
+  - Records the end and lands the Session in the terminal Debrief phase (ADR-0006's closing cue).
+  - The same static `x-assessor-tool-secret` header.
+
+The tool definitions live in `lib/assessor/tools.ts` (`ASSESSOR_TOOLS`) so `assessor:configure`, the system prompt test, and this record share one source of truth.
