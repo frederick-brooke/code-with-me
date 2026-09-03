@@ -72,7 +72,8 @@ export interface PerformanceSummary {
  * The persisted record of one Session, assembled by `SessionEngine.getSessionRecord`:
  * the Problem, the final/Working Code, every Run, and the transcript. The whole
  * record is what the Performance Summary generator (and the Session history page)
- * is fed. It structurally excludes hidden-test inputs and expected outputs.
+ * is fed. The Problem projection has its hidden tests stripped, so hidden-test
+ * inputs and expected outputs never reach any consumer of the record.
  */
 export interface SessionRecord {
   session: Session;

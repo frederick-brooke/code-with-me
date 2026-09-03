@@ -26,7 +26,3 @@ export function getSummaryConfig(): SummaryConfig | null {
     model: process.env.SUMMARY_LLM_MODEL ?? DEFAULT_SUMMARY_MODEL,
   };
 }
-
-export function isSummaryConfigured(): boolean {
-  return getSummaryConfig() !== null;
-}

@@ -72,11 +72,13 @@ describe("buildSummaryUserMessage", () => {
   });
 
   it("never leaks hidden-test inputs or expected outputs", async () => {
-    const record = await makeRecord();
-    expect(record.problem).not.toBeNull();
+    const store = makeSeededStore();
+    const record = await makeRecord(store);
     const message = buildSummaryUserMessage(record);
+    const problem = await store.findProblemById("two-sum");
     expect(message).not.toContain("hiddenTests");
-    for (const test of record.problem!.hiddenTests) {
+    expect(record.problem?.hiddenTests).toEqual([]);
+    for (const test of problem!.hiddenTests) {
       expect(message).not.toContain(test.input);
       expect(message).not.toContain(test.expectedOutput);
     }

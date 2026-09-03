@@ -396,6 +396,16 @@ describe("SessionEngine getSessionRecord", () => {
     const engine = new SessionEngine(makeStore());
     expect(await engine.getSessionRecord("missing")).toBeNull();
   });
+
+  it("strips hidden tests from the Problem projection in the record", async () => {
+    const store = makeStore();
+    const engine = new SessionEngine(store);
+    await engine.start("session-1", "candidate-1", "two-sum");
+
+    const record = await engine.getSessionRecord("session-1");
+    expect(record?.problem?.hiddenTests).toEqual([]);
+    expect(record?.problem?.hintTiers.length).toBeGreaterThan(0);
+  });
 });
 
 describe("SessionEngine listSessionsForCandidate summary", () => {

@@ -122,4 +122,45 @@ describe("debriefSession", () => {
     const { summary } = await debriefSession(store, "missing", { config, fetchImpl: okFetch() });
     expect(summary).toBeNull();
   });
+
+  it("returns a summary a concurrent trigger persisted mid-generation instead of overwriting it", async () => {
+    const store = makeSeededStore();
+    const sessionId = await startEndedSession(store);
+    const racingFetch = (async () => {
+      await store.createPerformanceSummary({
+        id: "racer",
+        sessionId,
+        content: "From the racer.",
+        createdAt: new Date(),
+      });
+      return new Response(
+        JSON.stringify({ choices: [{ message: { content: "From me." } }] }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+    }) as unknown as typeof fetch;
+
+    const { summary } = await debriefSession(store, sessionId, { config, fetchImpl: racingFetch });
+
+    expect(summary?.content).toBe("From the racer.");
+    expect((await store.findPerformanceSummaryBySession(sessionId))?.id).toBe("racer");
+  });
+
+  it("never throws even when a store read fails", async () => {
+    const store = makeSeededStore();
+    const sessionId = await startEndedSession(store);
+    const failingStore = new Proxy(store, {
+      get(target, prop, receiver) {
+        if (prop === "findSessionById") {
+          return () => Promise.reject(new Error("db down"));
+        }
+        return Reflect.get(target, prop, receiver);
+      },
+    }) as DataStore;
+    const fetchImpl = okFetch();
+
+    const { summary } = await debriefSession(failingStore, sessionId, { config, fetchImpl });
+
+    expect(summary).toBeNull();
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
 });

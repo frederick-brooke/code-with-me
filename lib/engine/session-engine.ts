@@ -233,8 +233,9 @@ export class SessionEngine {
   /**
    * The full Session Record projection: the Problem, every Run, the transcript,
    * and the Candidate's final/Working Code. This is what the Performance Summary
-   * generator and the Session history page are fed (spec's Session Record). It
-   * deliberately excludes hidden-test inputs and expected outputs.
+   * generator and the Session history page are fed (spec's Session Record). The
+   * Problem projection has its hidden tests stripped, so no consumer of the
+   * record can observe hidden-test inputs or expected outputs (ADR-0001/0005).
    */
   async getSessionRecord(sessionId: string): Promise<SessionRecord | null> {
     const session = await this.store.findSessionById(sessionId);
@@ -246,7 +247,13 @@ export class SessionEngine {
     const messages = await this.store.listMessagesBySession(sessionId);
     const lastRun = runs.at(-1);
     const currentCode = session.workingCode ?? lastRun?.code ?? problem?.starterTemplate ?? "";
-    return { session, problem, runs, messages, currentCode };
+    return {
+      session,
+      problem: problem ? { ...problem, hiddenTests: [] } : null,
+      runs,
+      messages,
+      currentCode,
+    };
   }
 
   private async moveTo(sessionId: string, phase: SessionPhase): Promise<Session> {
