@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+This is a Next.js mock live-coding interview app: passwordless Candidate sign-in, a UI-free `SessionEngine` owning the Session lifecycle, and a durable data layer over a managed PostgreSQL database via Prisma. When `DATABASE_URL` is unset, local development and the test suite use in-memory stores.
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Configuration
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Copy `.env.example` to `.env` and fill in what you need. All variables are optional for local development:
 
-## Learn More
+- `DATABASE_URL` — managed Postgres connection string. When set, the app uses the Postgres stores and seeds the problem set idempotently; when unset, the in-memory stores run.
+- `APP_URL` — base URL used to build magic links in login emails.
+- `EMAIL_API_KEY` / `EMAIL_FROM` — Resend transactional email. When unset, login codes are shown on screen instead of emailed.
+- `ELEVENLABS_API_KEY` / `ELEVENLABS_AGENT_ID` — the managed Assessor voice agent. When unset, the interview page shows the Assessor panel as not-configured.
+- `ASSESSOR_TOOL_SECRET` / `ASSESSOR_TOOL_BASE_URL` — the webhook-tool shared secret and its public base URL; see `npm run assessor:configure`.
 
-To learn more about Next.js, take a look at the following resources:
+Run the database migrations against a configured `DATABASE_URL` with:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm run db:migrate
+```
 
 ## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Create a free project at [Neon](https://neon.tech) (or Supabase) and copy the **pooled** connection string (a `-pooler` host makes many cold-started serverless functions share a small connection pool).
+2. Import this repository into Vercel.
+3. Add the env vars from the Configuration section as **Production** env vars in the Vercel project settings. At minimum set `DATABASE_URL` to the pooled URL (with `sslmode=require`) and `APP_URL` to your deployed origin. Set the rest — `EMAIL_API_KEY`, `ELEVENLABS_API_KEY`, `ELEVENLABS_AGENT_ID`, `ASSESSOR_TOOL_SECRET`, `ASSESSOR_TOOL_BASE_URL` — if you want those features.
+4. Deploy. The build's prebuild step runs `prisma migrate deploy` under the hood (`scripts/migrate-on-vercel.mts`), which applies any pending migrations; with no `DATABASE_URL` it no-ops so preview/env-less builds still succeed against the in-memory stores.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Production fails fast when `DATABASE_URL` is missing — the Postgres stores are required there.
