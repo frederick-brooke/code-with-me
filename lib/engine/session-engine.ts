@@ -1,14 +1,8 @@
 import { randomUUID } from "node:crypto";
+import { PHASE_ORDER } from "@/lib/data/phases";
 import type { DataStore, Problem, Session, SessionPhase } from "@/lib/data/types";
 
-export const PHASE_ORDER: SessionPhase[] = [
-  "introduction",
-  "clarifying",
-  "approach",
-  "implementation",
-  "wrap-up",
-  "debrief",
-];
+export { PHASE_ORDER } from "@/lib/data/phases";
 
 export interface SessionRunInput {
   code: string;
