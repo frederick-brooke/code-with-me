@@ -13,7 +13,8 @@
     "assessor:configure": "node scripts/assessor-configure.mts",
     "lint": "eslint",
     "test": "vitest run",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "doctor": "npx react-doctor@latest"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.20.3",
@@ -47,6 +48,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.3.4",
     "prisma": "^7.10.0",
+    "react-doctor": "^0.9.13",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.1.11"
