@@ -1,6 +1,10 @@
 import "dotenv/config";
 import { readFileSync } from "node:fs";
-import { ASSESSOR_TOOLS as TOOLS, type WebhookToolSpec } from "@/lib/assessor/tools";
+import {
+  ASSESSOR_TOOLS as TOOLS,
+  buildWebhookToolConfig,
+  type WebhookToolSpec,
+} from "../lib/assessor/tools.ts";
 
 const API = "https://api.elevenlabs.io";
 
@@ -51,34 +55,11 @@ async function apiJson(path: string, init?: RequestInit): Promise<{ ok: boolean;
   return { ok: response.ok, status: response.status, body };
 }
 
-function toolConfigUrl(path: string): string {
-  const base = process.env.ASSESSOR_TOOL_BASE_URL ?? process.env.APP_URL ?? "http://localhost:3000";
-  return `${base.replace(/\/$/, "")}${path}`;
-}
-
-function buildToolConfig(spec: WebhookToolSpec, secret: string): Record<string, unknown> {
-  return {
-    type: "webhook",
-    name: spec.name,
-    description: spec.description,
-    api_schema: {
-      url: toolConfigUrl(spec.path),
-      method: spec.method,
-      path_params_schema: {
-        session_id: {
-          type: "string",
-          dynamic_variable: "session_id",
-        },
-      },
-      request_headers: {
-        "x-assessor-tool-secret": secret,
-      },
-      ...(spec.method === "POST"
-        ? { request_body_schema: spec.requestBodySchema, content_type: "application/json" }
-        : {}),
-    },
-    response_timeout_secs: 30,
-  };
+function toolBaseUrl(): string {
+  return (process.env.ASSESSOR_TOOL_BASE_URL ?? process.env.APP_URL ?? "http://localhost:3000").replace(
+    /\/$/,
+    "",
+  );
 }
 
 async function readExistingTool(name: string): Promise<ToolEntry | null> {
@@ -91,7 +72,7 @@ async function readExistingTool(name: string): Promise<ToolEntry | null> {
 }
 
 async function upsertTool(spec: WebhookToolSpec, secret: string): Promise<string> {
-  const toolConfig = buildToolConfig(spec, secret);
+  const toolConfig = buildWebhookToolConfig(spec, { baseUrl: toolBaseUrl(), secret });
 
   const existing = await readExistingTool(spec.name);
   if (existing) {
@@ -232,7 +213,7 @@ const secret = toolSecret;
 const agentId = configuredAgentId;
 
 for (const tool of TOOLS) {
-  const url = toolConfigUrl(tool.path);
+  const url = `${toolBaseUrl()}${tool.path}`;
   if (url.startsWith("http://localhost") || url.startsWith("http://127.0.0.1")) {
     console.warn(
       `\nWARNING: webhook URL is ${url}.\n` +
