@@ -23,6 +23,7 @@ function makeProblem(overrides?: Partial<Problem>): Problem {
     starterTemplate: "def two_sum(nums, target):\n    pass\n",
     sampleTests: [{ input: "[2, 7, 11, 15], 9", expectedOutput: "[0, 1]" }],
     hiddenTests: [{ input: "[3, 3], 6", expectedOutput: "[0, 1]" }],
+    hintTiers: ["Think about approach.", "Think about structure.", "Think about the technique."],
     ...overrides,
   };
 }
@@ -37,6 +38,7 @@ function makeSession(overrides?: Partial<Session>): Session {
     endedAt: null,
     workingCode: null,
     lastActivityAt: null,
+    hintsGiven: 0,
     ...overrides,
   };
 }

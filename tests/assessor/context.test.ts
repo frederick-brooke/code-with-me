@@ -13,6 +13,7 @@ const twoSum: Problem = {
     { input: "[4, 1, 4], 5", expectedOutput: "[0, 2]" },
     { input: "[0, 6, 0], 6", expectedOutput: "[0, 2]" },
   ],
+  hintTiers: ["Tier one.", "Tier two.", "Tier three."],
 };
 
 describe("buildAssessorContext", () => {

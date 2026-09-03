@@ -65,6 +65,7 @@ export class SessionEngine {
       endedAt: null,
       workingCode: null,
       lastActivityAt: null,
+      hintsGiven: 0,
     };
     return this.store.createSession(session);
   }
@@ -108,6 +109,15 @@ export class SessionEngine {
   async saveWorkingCode(sessionId: string, code: string): Promise<Session> {
     await this.requireActiveSession(sessionId);
     return this.updateActiveSession(sessionId, { workingCode: code });
+  }
+
+  /**
+   * Records a hint request so the structural guard (ADR-0001) can escalate the
+   * Candidate across hint tiers. A hint counts as Candidate activity.
+   */
+  async recordHint(sessionId: string): Promise<Session> {
+    const session = await this.requireActiveSession(sessionId);
+    return this.updateActiveSession(sessionId, { hintsGiven: session.hintsGiven + 1 });
   }
 
   /**
@@ -223,12 +233,13 @@ export class SessionEngine {
   /** Candidate activity only: Working Code saves, Runs, and Candidate turns. */
   private async updateActiveSession(
     sessionId: string,
-    patch: { workingCode?: string },
+    patch: { workingCode?: string; hintsGiven?: number },
   ): Promise<Session> {
     const session = await this.requireActiveSession(sessionId);
     return this.store.updateSession({
       ...session,
       workingCode: patch.workingCode ?? session.workingCode,
+      hintsGiven: patch.hintsGiven ?? session.hintsGiven,
       lastActivityAt: new Date(),
     });
   }

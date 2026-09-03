@@ -360,3 +360,39 @@ describe("SessionEngine", () => {
     expect(await engine.getSession("missing")).toBeNull();
   });
 });
+
+describe("SessionEngine recordHint", () => {
+  it("starts a Session with no hints given", async () => {
+    const store = makeSeededStore();
+    const session = await new SessionEngine(store).start("session-1", "candidate-1", "two-sum");
+    expect(session.hintsGiven).toBe(0);
+    expect((await store.findSessionById("session-1"))?.hintsGiven).toBe(0);
+  });
+
+  it("counts each hint request, durably, across calls", async () => {
+    const store = makeSeededStore();
+    const engine = new SessionEngine(store);
+    await engine.start("session-1", "candidate-1", "two-sum");
+
+    await engine.recordHint("session-1");
+    await engine.recordHint("session-1");
+    await engine.recordHint("session-1");
+
+    expect((await store.findSessionById("session-1"))?.hintsGiven).toBe(3);
+  });
+
+  it("marks a hint as Candidate activity", async () => {
+    const engine = new SessionEngine(makeSeededStore());
+    await engine.start("session-1", "candidate-1", "two-sum");
+    expect((await engine.query("session-1")).lastActivityAt).toBeNull();
+
+    await engine.recordHint("session-1");
+
+    expect((await engine.query("session-1")).lastActivityAt).toBeInstanceOf(Date);
+  });
+
+  it("throws for an unknown Session", async () => {
+    const engine = new SessionEngine(makeSeededStore());
+    await expect(engine.recordHint("missing")).rejects.toThrow(/Unknown session: missing/);
+  });
+});

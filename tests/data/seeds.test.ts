@@ -46,4 +46,18 @@ describe("seeded Problems", () => {
     const ids = seedProblems.map((p) => p.id);
     expect(new Set(ids).size).toBe(ids.length);
   });
+
+  it("authors three hint tiers per problem that never read like an implementation", () => {
+    for (const problem of seedProblems) {
+      expect(problem.hintTiers.length).toBe(3);
+      for (const tier of problem.hintTiers) {
+        expect(tier.length).toBeGreaterThan(0);
+        expect(tier).not.toMatch(/\bdef\s+\w+\s*\(/);
+        expect(tier).not.toMatch(/\breturn\b/);
+        expect(tier).not.toMatch(/\bfor\s+\w+\s+in\b/);
+        expect(tier).not.toMatch(/\bwhile\b/);
+        expect(tier).not.toMatch(/\w\s*=\s*\w/);
+      }
+    }
+  });
 });

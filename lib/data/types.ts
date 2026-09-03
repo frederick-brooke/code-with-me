@@ -27,6 +27,8 @@ export interface Problem {
   starterTemplate?: string;
   sampleTests: TestCase[];
   hiddenTests: TestCase[];
+  /** Approach/structure guidance, most generic first. The hint guard serves these verbatim, never a full solution. */
+  hintTiers: string[];
 }
 
 export interface Session {
@@ -38,6 +40,8 @@ export interface Session {
   endedAt: Date | null;
   workingCode: string | null;
   lastActivityAt: Date | null;
+  /** How many hints the Candidate has been given this Session; drives hint-tier escalation. */
+  hintsGiven: number;
 }
 
 export interface Run {

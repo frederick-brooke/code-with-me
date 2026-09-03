@@ -91,6 +91,7 @@ function toProblem(row: ProblemRow): Problem {
     starterTemplate: row.starterTemplate ?? undefined,
     sampleTests: parseTests(row.sampleTests),
     hiddenTests: parseTests(row.hiddenTests),
+    hintTiers: row.hintTiers,
   };
 }
 
@@ -104,6 +105,7 @@ function toSession(row: SessionRow): Session {
     endedAt: row.endedAt,
     workingCode: row.workingCode,
     lastActivityAt: row.lastActivityAt,
+    hintsGiven: row.hintsGiven,
   };
 }
 
@@ -165,6 +167,7 @@ export class PostgresDataStore implements DataStore {
         starterTemplate: problem.starterTemplate ?? null,
         sampleTests: toJson(problem.sampleTests),
         hiddenTests: toJson(problem.hiddenTests),
+        hintTiers: problem.hintTiers,
       },
       create: {
         id: problem.id,
@@ -174,6 +177,7 @@ export class PostgresDataStore implements DataStore {
         starterTemplate: problem.starterTemplate ?? null,
         sampleTests: toJson(problem.sampleTests),
         hiddenTests: toJson(problem.hiddenTests),
+        hintTiers: problem.hintTiers,
       },
     });
     return problem;
@@ -200,6 +204,7 @@ export class PostgresDataStore implements DataStore {
         endedAt: session.endedAt,
         workingCode: session.workingCode,
         lastActivityAt: session.lastActivityAt,
+        hintsGiven: session.hintsGiven,
       },
     });
     return toSession(row);
@@ -219,6 +224,7 @@ export class PostgresDataStore implements DataStore {
         endedAt: session.endedAt,
         workingCode: session.workingCode,
         lastActivityAt: session.lastActivityAt,
+        hintsGiven: session.hintsGiven,
       },
     });
     return toSession(row);

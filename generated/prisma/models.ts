@@ -8,12 +8,12 @@
  *
  * 🟢 You can import this file directly.
  */
-export type * from './models/Candidate'
-export type * from './models/Problem'
-export type * from './models/Session'
-export type * from './models/Run'
-export type * from './models/Message'
-export type * from './models/PerformanceSummary'
-export type * from './models/PendingCode'
-export type * from './models/AuthSession'
-export type * from './commonInputTypes'
+export type * from './models/Candidate.ts'
+export type * from './models/Problem.ts'
+export type * from './models/Session.ts'
+export type * from './models/Run.ts'
+export type * from './models/Message.ts'
+export type * from './models/PerformanceSummary.ts'
+export type * from './models/PendingCode.ts'
+export type * from './models/AuthSession.ts'
+export type * from './commonInputTypes.ts'

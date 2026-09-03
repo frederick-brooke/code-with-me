@@ -16,10 +16,10 @@
  */
 
 import * as runtime from "@prisma/client/runtime/client"
-import type * as Prisma from "../models"
-import { type PrismaClient } from "./class"
+import type * as Prisma from "../models.ts"
+import { type PrismaClient } from "./class.ts"
 
-export type * from '../models'
+export type * from '../models.ts'
 
 export type DMMF = typeof runtime.DMMF
 
@@ -1071,7 +1071,8 @@ export const ProblemScalarFieldEnum = {
   difficulty: 'difficulty',
   starterTemplate: 'starterTemplate',
   sampleTests: 'sampleTests',
-  hiddenTests: 'hiddenTests'
+  hiddenTests: 'hiddenTests',
+  hintTiers: 'hintTiers'
 } as const
 
 export type ProblemScalarFieldEnum = (typeof ProblemScalarFieldEnum)[keyof typeof ProblemScalarFieldEnum]
@@ -1085,7 +1086,8 @@ export const SessionScalarFieldEnum = {
   startedAt: 'startedAt',
   endedAt: 'endedAt',
   workingCode: 'workingCode',
-  lastActivityAt: 'lastActivityAt'
+  lastActivityAt: 'lastActivityAt',
+  hintsGiven: 'hintsGiven'
 } as const
 
 export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]

@@ -5,6 +5,17 @@ const BASE_URL = "https://app.example.com";
 const SECRET = "secret-123";
 
 describe("ASSESSOR_TOOLS", () => {
+  it("registers the get_hint guard tool against the hint route", () => {
+    const hint = ASSESSOR_TOOLS.find((tool) => tool.name === "get_hint");
+    expect(hint).toBeDefined();
+    expect(hint?.method).toBe("POST");
+    expect(hint?.path).toBe("/api/assessor/hint/{session_id}");
+    if (hint?.method === "POST") {
+      expect(hint.requestBodySchema).toBeDefined();
+      expect(hint.requestBodySchema.required).toContain("question");
+    }
+  });
+
   it("registers the end_session webhook tool against the end route", () => {
     const endSession = ASSESSOR_TOOLS.find((tool) => tool.name === "end_session");
     expect(endSession).toBeDefined();

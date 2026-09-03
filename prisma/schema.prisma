@@ -47,6 +47,7 @@ model Problem {
   starterTemplate String?
   sampleTests     Json      @default("[]")
   hiddenTests     Json      @default("[]")
+  hintTiers       String[]  @default([])
   sessions        Session[]
 }
 
@@ -59,6 +60,7 @@ model Session {
   endedAt        DateTime?
   workingCode    String?
   lastActivityAt DateTime?
+  hintsGiven     Int      @default(0)
   candidate      Candidate           @relation("CandidateSessions", fields: [candidateId], references: [id])
   problem        Problem             @relation(fields: [problemId], references: [id])
   runs           Run[]

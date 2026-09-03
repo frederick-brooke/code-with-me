@@ -71,6 +71,24 @@ export function buildWebhookToolConfig(
  */
 export const ASSESSOR_TOOLS: WebhookToolSpec[] = [
   {
+    name: "get_hint",
+    description:
+      "Returns hint-tiered guidance for the Candidate after they ask for help. Call it whenever the Candidate's question or request sounds like they want the answer — 'can you just show me', 'what's the solution', 'give me a clue' — and read the returned guidance back in your own words. The backend serves approach and structure only, never a full implementation, and escalates how concrete the hint is the more hints the Candidate has had.",
+    path: "/api/assessor/hint/{session_id}",
+    method: "POST",
+    requestBodySchema: {
+      type: "object",
+      description: "The Candidate's question or request, in their own words.",
+      properties: {
+        question: {
+          type: "string",
+          description: "What the Candidate asked, verbatim enough to stay faithful.",
+        },
+      },
+      required: ["question"],
+    },
+  },
+  {
     name: "get_session_state",
     description:
       "Returns the Candidate's current working code, their latest visible Run pass/fail counts, how many Runs they have made, how recently the last Run and last activity happened, and the current phase for the active Session. Call it before every speaking turn so you always speak from the Candidate's actual state.",

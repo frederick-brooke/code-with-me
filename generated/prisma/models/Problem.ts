@@ -9,8 +9,8 @@
  * 🟢 You can import this file directly.
  */
 import type * as runtime from "@prisma/client/runtime/client"
-import type * as $Enums from "../enums"
-import type * as Prisma from "../internal/prismaNamespace"
+import type * as $Enums from "../enums.ts"
+import type * as Prisma from "../internal/prismaNamespace.ts"
 
 /**
  * Model Problem
@@ -48,6 +48,7 @@ export type ProblemCountAggregateOutputType = {
   starterTemplate: number
   sampleTests: number
   hiddenTests: number
+  hintTiers: number
   _all: number
 }
 
@@ -76,6 +77,7 @@ export type ProblemCountAggregateInputType = {
   starterTemplate?: true
   sampleTests?: true
   hiddenTests?: true
+  hintTiers?: true
   _all?: true
 }
 
@@ -159,6 +161,7 @@ export type ProblemGroupByOutputType = {
   starterTemplate: string | null
   sampleTests: runtime.JsonValue
   hiddenTests: runtime.JsonValue
+  hintTiers: string[]
   _count: ProblemCountAggregateOutputType | null
   _min: ProblemMinAggregateOutputType | null
   _max: ProblemMaxAggregateOutputType | null
@@ -190,6 +193,7 @@ export type ProblemWhereInput = {
   starterTemplate?: Prisma.StringNullableFilter<"Problem"> | string | null
   sampleTests?: Prisma.JsonFilter<"Problem">
   hiddenTests?: Prisma.JsonFilter<"Problem">
+  hintTiers?: Prisma.StringNullableListFilter<"Problem">
   sessions?: Prisma.SessionListRelationFilter
 }
 
@@ -201,6 +205,7 @@ export type ProblemOrderByWithRelationInput = {
   starterTemplate?: Prisma.SortOrderInput | Prisma.SortOrder
   sampleTests?: Prisma.SortOrder
   hiddenTests?: Prisma.SortOrder
+  hintTiers?: Prisma.SortOrder
   sessions?: Prisma.SessionOrderByRelationAggregateInput
 }
 
@@ -215,6 +220,7 @@ export type ProblemWhereUniqueInput = Prisma.AtLeast<{
   starterTemplate?: Prisma.StringNullableFilter<"Problem"> | string | null
   sampleTests?: Prisma.JsonFilter<"Problem">
   hiddenTests?: Prisma.JsonFilter<"Problem">
+  hintTiers?: Prisma.StringNullableListFilter<"Problem">
   sessions?: Prisma.SessionListRelationFilter
 }, "id">
 
@@ -226,6 +232,7 @@ export type ProblemOrderByWithAggregationInput = {
   starterTemplate?: Prisma.SortOrderInput | Prisma.SortOrder
   sampleTests?: Prisma.SortOrder
   hiddenTests?: Prisma.SortOrder
+  hintTiers?: Prisma.SortOrder
   _count?: Prisma.ProblemCountOrderByAggregateInput
   _max?: Prisma.ProblemMaxOrderByAggregateInput
   _min?: Prisma.ProblemMinOrderByAggregateInput
@@ -242,6 +249,7 @@ export type ProblemScalarWhereWithAggregatesInput = {
   starterTemplate?: Prisma.StringNullableWithAggregatesFilter<"Problem"> | string | null
   sampleTests?: Prisma.JsonWithAggregatesFilter<"Problem">
   hiddenTests?: Prisma.JsonWithAggregatesFilter<"Problem">
+  hintTiers?: Prisma.StringNullableListFilter<"Problem">
 }
 
 export type ProblemCreateInput = {
@@ -252,6 +260,7 @@ export type ProblemCreateInput = {
   starterTemplate?: string | null
   sampleTests?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   hiddenTests?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  hintTiers?: Prisma.ProblemCreatehintTiersInput | string[]
   sessions?: Prisma.SessionCreateNestedManyWithoutProblemInput
 }
 
@@ -263,6 +272,7 @@ export type ProblemUncheckedCreateInput = {
   starterTemplate?: string | null
   sampleTests?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   hiddenTests?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  hintTiers?: Prisma.ProblemCreatehintTiersInput | string[]
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutProblemInput
 }
 
@@ -274,6 +284,7 @@ export type ProblemUpdateInput = {
   starterTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sampleTests?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   hiddenTests?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  hintTiers?: Prisma.ProblemUpdatehintTiersInput | string[]
   sessions?: Prisma.SessionUpdateManyWithoutProblemNestedInput
 }
 
@@ -285,6 +296,7 @@ export type ProblemUncheckedUpdateInput = {
   starterTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sampleTests?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   hiddenTests?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  hintTiers?: Prisma.ProblemUpdatehintTiersInput | string[]
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutProblemNestedInput
 }
 
@@ -296,6 +308,7 @@ export type ProblemCreateManyInput = {
   starterTemplate?: string | null
   sampleTests?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   hiddenTests?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  hintTiers?: Prisma.ProblemCreatehintTiersInput | string[]
 }
 
 export type ProblemUpdateManyMutationInput = {
@@ -306,6 +319,7 @@ export type ProblemUpdateManyMutationInput = {
   starterTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sampleTests?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   hiddenTests?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  hintTiers?: Prisma.ProblemUpdatehintTiersInput | string[]
 }
 
 export type ProblemUncheckedUpdateManyInput = {
@@ -316,6 +330,15 @@ export type ProblemUncheckedUpdateManyInput = {
   starterTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sampleTests?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   hiddenTests?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  hintTiers?: Prisma.ProblemUpdatehintTiersInput | string[]
+}
+
+export type StringNullableListFilter<$PrismaModel = never> = {
+  equals?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel> | null
+  has?: string | Prisma.StringFieldRefInput<$PrismaModel> | null
+  hasEvery?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
+  hasSome?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
+  isEmpty?: boolean
 }
 
 export type ProblemCountOrderByAggregateInput = {
@@ -326,6 +349,7 @@ export type ProblemCountOrderByAggregateInput = {
   starterTemplate?: Prisma.SortOrder
   sampleTests?: Prisma.SortOrder
   hiddenTests?: Prisma.SortOrder
+  hintTiers?: Prisma.SortOrder
 }
 
 export type ProblemMaxOrderByAggregateInput = {
@@ -349,12 +373,21 @@ export type ProblemScalarRelationFilter = {
   isNot?: Prisma.ProblemWhereInput
 }
 
+export type ProblemCreatehintTiersInput = {
+  set: string[]
+}
+
 export type EnumDifficultyFieldUpdateOperationsInput = {
   set?: $Enums.Difficulty
 }
 
 export type NullableStringFieldUpdateOperationsInput = {
   set?: string | null
+}
+
+export type ProblemUpdatehintTiersInput = {
+  set?: string[]
+  push?: string | string[]
 }
 
 export type ProblemCreateNestedOneWithoutSessionsInput = {
@@ -379,6 +412,7 @@ export type ProblemCreateWithoutSessionsInput = {
   starterTemplate?: string | null
   sampleTests?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   hiddenTests?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  hintTiers?: Prisma.ProblemCreatehintTiersInput | string[]
 }
 
 export type ProblemUncheckedCreateWithoutSessionsInput = {
@@ -389,6 +423,7 @@ export type ProblemUncheckedCreateWithoutSessionsInput = {
   starterTemplate?: string | null
   sampleTests?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   hiddenTests?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  hintTiers?: Prisma.ProblemCreatehintTiersInput | string[]
 }
 
 export type ProblemCreateOrConnectWithoutSessionsInput = {
@@ -415,6 +450,7 @@ export type ProblemUpdateWithoutSessionsInput = {
   starterTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sampleTests?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   hiddenTests?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  hintTiers?: Prisma.ProblemUpdatehintTiersInput | string[]
 }
 
 export type ProblemUncheckedUpdateWithoutSessionsInput = {
@@ -425,6 +461,7 @@ export type ProblemUncheckedUpdateWithoutSessionsInput = {
   starterTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sampleTests?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   hiddenTests?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  hintTiers?: Prisma.ProblemUpdatehintTiersInput | string[]
 }
 
 
@@ -466,6 +503,7 @@ export type ProblemSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   starterTemplate?: boolean
   sampleTests?: boolean
   hiddenTests?: boolean
+  hintTiers?: boolean
   sessions?: boolean | Prisma.Problem$sessionsArgs<ExtArgs>
   _count?: boolean | Prisma.ProblemCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["problem"]>
@@ -478,6 +516,7 @@ export type ProblemSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   starterTemplate?: boolean
   sampleTests?: boolean
   hiddenTests?: boolean
+  hintTiers?: boolean
 }, ExtArgs["result"]["problem"]>
 
 export type ProblemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -488,6 +527,7 @@ export type ProblemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   starterTemplate?: boolean
   sampleTests?: boolean
   hiddenTests?: boolean
+  hintTiers?: boolean
 }, ExtArgs["result"]["problem"]>
 
 export type ProblemSelectScalar = {
@@ -498,9 +538,10 @@ export type ProblemSelectScalar = {
   starterTemplate?: boolean
   sampleTests?: boolean
   hiddenTests?: boolean
+  hintTiers?: boolean
 }
 
-export type ProblemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "statement" | "difficulty" | "starterTemplate" | "sampleTests" | "hiddenTests", ExtArgs["result"]["problem"]>
+export type ProblemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "statement" | "difficulty" | "starterTemplate" | "sampleTests" | "hiddenTests" | "hintTiers", ExtArgs["result"]["problem"]>
 export type ProblemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | Prisma.Problem$sessionsArgs<ExtArgs>
   _count?: boolean | Prisma.ProblemCountOutputTypeDefaultArgs<ExtArgs>
@@ -521,6 +562,7 @@ export type $ProblemPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     starterTemplate: string | null
     sampleTests: runtime.JsonValue
     hiddenTests: runtime.JsonValue
+    hintTiers: string[]
   }, ExtArgs["result"]["problem"]>
   composites: {}
 }
@@ -952,6 +994,7 @@ export interface ProblemFieldRefs {
   readonly starterTemplate: Prisma.FieldRef<"Problem", 'String'>
   readonly sampleTests: Prisma.FieldRef<"Problem", 'Json'>
   readonly hiddenTests: Prisma.FieldRef<"Problem", 'Json'>
+  readonly hintTiers: Prisma.FieldRef<"Problem", 'String[]'>
 }
     
 

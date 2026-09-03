@@ -16,6 +16,10 @@ The agent is configured in the ElevenLabs dashboard for the tenant agent id in `
 - **Webhook tool** `get_session_state`:
   - Method `GET`, URL `https://<APP_URL>/api/assessor/session-state/{session_id}` where `{session_id}` is bound to the `session_id` dynamic variable.
   - A static header `x-assessor-tool-secret` set to the same value as `ASSESSOR_TOOL_SECRET`.
+- **Webhook tool** `get_hint`:
+  - Method `POST`, URL `https://<APP_URL>/api/assessor/hint/{session_id}`, body `{ "question": "<the Candidate's ask>" }`.
+  - The structural guard for the hint policy (ADR-0001): routes answer-solicitations to the backend, which serves the Problem's pre-authored, tier-escalating hint guidance — never a full solution.
+  - The same static `x-assessor-tool-secret` header.
 - **Webhook tool** `set_phase`:
   - Method `POST`, URL `https://<APP_URL>/api/assessor/phase/{session_id}`, body `{ "phase": "approach" }` naming one of the five arc phases or `debrief`.
   - The same static `x-assessor-tool-secret` header.

@@ -9,8 +9,8 @@
  * 🟢 You can import this file directly.
  */
 import type * as runtime from "@prisma/client/runtime/client"
-import type * as $Enums from "../enums"
-import type * as Prisma from "../internal/prismaNamespace"
+import type * as $Enums from "../enums.ts"
+import type * as Prisma from "../internal/prismaNamespace.ts"
 
 /**
  * Model Session
@@ -20,8 +20,18 @@ export type SessionModel = runtime.Types.Result.DefaultSelection<Prisma.$Session
 
 export type AggregateSession = {
   _count: SessionCountAggregateOutputType | null
+  _avg: SessionAvgAggregateOutputType | null
+  _sum: SessionSumAggregateOutputType | null
   _min: SessionMinAggregateOutputType | null
   _max: SessionMaxAggregateOutputType | null
+}
+
+export type SessionAvgAggregateOutputType = {
+  hintsGiven: number | null
+}
+
+export type SessionSumAggregateOutputType = {
+  hintsGiven: number | null
 }
 
 export type SessionMinAggregateOutputType = {
@@ -33,6 +43,7 @@ export type SessionMinAggregateOutputType = {
   endedAt: Date | null
   workingCode: string | null
   lastActivityAt: Date | null
+  hintsGiven: number | null
 }
 
 export type SessionMaxAggregateOutputType = {
@@ -44,6 +55,7 @@ export type SessionMaxAggregateOutputType = {
   endedAt: Date | null
   workingCode: string | null
   lastActivityAt: Date | null
+  hintsGiven: number | null
 }
 
 export type SessionCountAggregateOutputType = {
@@ -55,9 +67,18 @@ export type SessionCountAggregateOutputType = {
   endedAt: number
   workingCode: number
   lastActivityAt: number
+  hintsGiven: number
   _all: number
 }
 
+
+export type SessionAvgAggregateInputType = {
+  hintsGiven?: true
+}
+
+export type SessionSumAggregateInputType = {
+  hintsGiven?: true
+}
 
 export type SessionMinAggregateInputType = {
   id?: true
@@ -68,6 +89,7 @@ export type SessionMinAggregateInputType = {
   endedAt?: true
   workingCode?: true
   lastActivityAt?: true
+  hintsGiven?: true
 }
 
 export type SessionMaxAggregateInputType = {
@@ -79,6 +101,7 @@ export type SessionMaxAggregateInputType = {
   endedAt?: true
   workingCode?: true
   lastActivityAt?: true
+  hintsGiven?: true
 }
 
 export type SessionCountAggregateInputType = {
@@ -90,6 +113,7 @@ export type SessionCountAggregateInputType = {
   endedAt?: true
   workingCode?: true
   lastActivityAt?: true
+  hintsGiven?: true
   _all?: true
 }
 
@@ -131,6 +155,18 @@ export type SessionAggregateArgs<ExtArgs extends runtime.Types.Extensions.Intern
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: SessionAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: SessionSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: SessionMinAggregateInputType
@@ -161,6 +197,8 @@ export type SessionGroupByArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   _count?: SessionCountAggregateInputType | true
+  _avg?: SessionAvgAggregateInputType
+  _sum?: SessionSumAggregateInputType
   _min?: SessionMinAggregateInputType
   _max?: SessionMaxAggregateInputType
 }
@@ -174,7 +212,10 @@ export type SessionGroupByOutputType = {
   endedAt: Date | null
   workingCode: string | null
   lastActivityAt: Date | null
+  hintsGiven: number
   _count: SessionCountAggregateOutputType | null
+  _avg: SessionAvgAggregateOutputType | null
+  _sum: SessionSumAggregateOutputType | null
   _min: SessionMinAggregateOutputType | null
   _max: SessionMaxAggregateOutputType | null
 }
@@ -206,6 +247,7 @@ export type SessionWhereInput = {
   endedAt?: Prisma.DateTimeNullableFilter<"Session"> | Date | string | null
   workingCode?: Prisma.StringNullableFilter<"Session"> | string | null
   lastActivityAt?: Prisma.DateTimeNullableFilter<"Session"> | Date | string | null
+  hintsGiven?: Prisma.IntFilter<"Session"> | number
   candidate?: Prisma.XOR<Prisma.CandidateScalarRelationFilter, Prisma.CandidateWhereInput>
   problem?: Prisma.XOR<Prisma.ProblemScalarRelationFilter, Prisma.ProblemWhereInput>
   runs?: Prisma.RunListRelationFilter
@@ -222,6 +264,7 @@ export type SessionOrderByWithRelationInput = {
   endedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   workingCode?: Prisma.SortOrderInput | Prisma.SortOrder
   lastActivityAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  hintsGiven?: Prisma.SortOrder
   candidate?: Prisma.CandidateOrderByWithRelationInput
   problem?: Prisma.ProblemOrderByWithRelationInput
   runs?: Prisma.RunOrderByRelationAggregateInput
@@ -241,6 +284,7 @@ export type SessionWhereUniqueInput = Prisma.AtLeast<{
   endedAt?: Prisma.DateTimeNullableFilter<"Session"> | Date | string | null
   workingCode?: Prisma.StringNullableFilter<"Session"> | string | null
   lastActivityAt?: Prisma.DateTimeNullableFilter<"Session"> | Date | string | null
+  hintsGiven?: Prisma.IntFilter<"Session"> | number
   candidate?: Prisma.XOR<Prisma.CandidateScalarRelationFilter, Prisma.CandidateWhereInput>
   problem?: Prisma.XOR<Prisma.ProblemScalarRelationFilter, Prisma.ProblemWhereInput>
   runs?: Prisma.RunListRelationFilter
@@ -257,9 +301,12 @@ export type SessionOrderByWithAggregationInput = {
   endedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   workingCode?: Prisma.SortOrderInput | Prisma.SortOrder
   lastActivityAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  hintsGiven?: Prisma.SortOrder
   _count?: Prisma.SessionCountOrderByAggregateInput
+  _avg?: Prisma.SessionAvgOrderByAggregateInput
   _max?: Prisma.SessionMaxOrderByAggregateInput
   _min?: Prisma.SessionMinOrderByAggregateInput
+  _sum?: Prisma.SessionSumOrderByAggregateInput
 }
 
 export type SessionScalarWhereWithAggregatesInput = {
@@ -274,6 +321,7 @@ export type SessionScalarWhereWithAggregatesInput = {
   endedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Session"> | Date | string | null
   workingCode?: Prisma.StringNullableWithAggregatesFilter<"Session"> | string | null
   lastActivityAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Session"> | Date | string | null
+  hintsGiven?: Prisma.IntWithAggregatesFilter<"Session"> | number
 }
 
 export type SessionCreateInput = {
@@ -283,6 +331,7 @@ export type SessionCreateInput = {
   endedAt?: Date | string | null
   workingCode?: string | null
   lastActivityAt?: Date | string | null
+  hintsGiven?: number
   candidate: Prisma.CandidateCreateNestedOneWithoutSessionsInput
   problem: Prisma.ProblemCreateNestedOneWithoutSessionsInput
   runs?: Prisma.RunCreateNestedManyWithoutSessionInput
@@ -299,6 +348,7 @@ export type SessionUncheckedCreateInput = {
   endedAt?: Date | string | null
   workingCode?: string | null
   lastActivityAt?: Date | string | null
+  hintsGiven?: number
   runs?: Prisma.RunUncheckedCreateNestedManyWithoutSessionInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutSessionInput
   summary?: Prisma.PerformanceSummaryUncheckedCreateNestedOneWithoutSessionInput
@@ -311,6 +361,7 @@ export type SessionUpdateInput = {
   endedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   workingCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  hintsGiven?: Prisma.IntFieldUpdateOperationsInput | number
   candidate?: Prisma.CandidateUpdateOneRequiredWithoutSessionsNestedInput
   problem?: Prisma.ProblemUpdateOneRequiredWithoutSessionsNestedInput
   runs?: Prisma.RunUpdateManyWithoutSessionNestedInput
@@ -327,6 +378,7 @@ export type SessionUncheckedUpdateInput = {
   endedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   workingCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  hintsGiven?: Prisma.IntFieldUpdateOperationsInput | number
   runs?: Prisma.RunUncheckedUpdateManyWithoutSessionNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutSessionNestedInput
   summary?: Prisma.PerformanceSummaryUncheckedUpdateOneWithoutSessionNestedInput
@@ -341,6 +393,7 @@ export type SessionCreateManyInput = {
   endedAt?: Date | string | null
   workingCode?: string | null
   lastActivityAt?: Date | string | null
+  hintsGiven?: number
 }
 
 export type SessionUpdateManyMutationInput = {
@@ -350,6 +403,7 @@ export type SessionUpdateManyMutationInput = {
   endedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   workingCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  hintsGiven?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type SessionUncheckedUpdateManyInput = {
@@ -361,6 +415,7 @@ export type SessionUncheckedUpdateManyInput = {
   endedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   workingCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  hintsGiven?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type SessionListRelationFilter = {
@@ -382,6 +437,11 @@ export type SessionCountOrderByAggregateInput = {
   endedAt?: Prisma.SortOrder
   workingCode?: Prisma.SortOrder
   lastActivityAt?: Prisma.SortOrder
+  hintsGiven?: Prisma.SortOrder
+}
+
+export type SessionAvgOrderByAggregateInput = {
+  hintsGiven?: Prisma.SortOrder
 }
 
 export type SessionMaxOrderByAggregateInput = {
@@ -393,6 +453,7 @@ export type SessionMaxOrderByAggregateInput = {
   endedAt?: Prisma.SortOrder
   workingCode?: Prisma.SortOrder
   lastActivityAt?: Prisma.SortOrder
+  hintsGiven?: Prisma.SortOrder
 }
 
 export type SessionMinOrderByAggregateInput = {
@@ -404,6 +465,11 @@ export type SessionMinOrderByAggregateInput = {
   endedAt?: Prisma.SortOrder
   workingCode?: Prisma.SortOrder
   lastActivityAt?: Prisma.SortOrder
+  hintsGiven?: Prisma.SortOrder
+}
+
+export type SessionSumOrderByAggregateInput = {
+  hintsGiven?: Prisma.SortOrder
 }
 
 export type SessionScalarRelationFilter = {
@@ -503,6 +569,14 @@ export type NullableDateTimeFieldUpdateOperationsInput = {
   set?: Date | string | null
 }
 
+export type IntFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
 export type SessionCreateNestedOneWithoutRunsInput = {
   create?: Prisma.XOR<Prisma.SessionCreateWithoutRunsInput, Prisma.SessionUncheckedCreateWithoutRunsInput>
   connectOrCreate?: Prisma.SessionCreateOrConnectWithoutRunsInput
@@ -552,6 +626,7 @@ export type SessionCreateWithoutCandidateInput = {
   endedAt?: Date | string | null
   workingCode?: string | null
   lastActivityAt?: Date | string | null
+  hintsGiven?: number
   problem: Prisma.ProblemCreateNestedOneWithoutSessionsInput
   runs?: Prisma.RunCreateNestedManyWithoutSessionInput
   messages?: Prisma.MessageCreateNestedManyWithoutSessionInput
@@ -566,6 +641,7 @@ export type SessionUncheckedCreateWithoutCandidateInput = {
   endedAt?: Date | string | null
   workingCode?: string | null
   lastActivityAt?: Date | string | null
+  hintsGiven?: number
   runs?: Prisma.RunUncheckedCreateNestedManyWithoutSessionInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutSessionInput
   summary?: Prisma.PerformanceSummaryUncheckedCreateNestedOneWithoutSessionInput
@@ -609,6 +685,7 @@ export type SessionScalarWhereInput = {
   endedAt?: Prisma.DateTimeNullableFilter<"Session"> | Date | string | null
   workingCode?: Prisma.StringNullableFilter<"Session"> | string | null
   lastActivityAt?: Prisma.DateTimeNullableFilter<"Session"> | Date | string | null
+  hintsGiven?: Prisma.IntFilter<"Session"> | number
 }
 
 export type SessionCreateWithoutProblemInput = {
@@ -618,6 +695,7 @@ export type SessionCreateWithoutProblemInput = {
   endedAt?: Date | string | null
   workingCode?: string | null
   lastActivityAt?: Date | string | null
+  hintsGiven?: number
   candidate: Prisma.CandidateCreateNestedOneWithoutSessionsInput
   runs?: Prisma.RunCreateNestedManyWithoutSessionInput
   messages?: Prisma.MessageCreateNestedManyWithoutSessionInput
@@ -632,6 +710,7 @@ export type SessionUncheckedCreateWithoutProblemInput = {
   endedAt?: Date | string | null
   workingCode?: string | null
   lastActivityAt?: Date | string | null
+  hintsGiven?: number
   runs?: Prisma.RunUncheckedCreateNestedManyWithoutSessionInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutSessionInput
   summary?: Prisma.PerformanceSummaryUncheckedCreateNestedOneWithoutSessionInput
@@ -670,6 +749,7 @@ export type SessionCreateWithoutRunsInput = {
   endedAt?: Date | string | null
   workingCode?: string | null
   lastActivityAt?: Date | string | null
+  hintsGiven?: number
   candidate: Prisma.CandidateCreateNestedOneWithoutSessionsInput
   problem: Prisma.ProblemCreateNestedOneWithoutSessionsInput
   messages?: Prisma.MessageCreateNestedManyWithoutSessionInput
@@ -685,6 +765,7 @@ export type SessionUncheckedCreateWithoutRunsInput = {
   endedAt?: Date | string | null
   workingCode?: string | null
   lastActivityAt?: Date | string | null
+  hintsGiven?: number
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutSessionInput
   summary?: Prisma.PerformanceSummaryUncheckedCreateNestedOneWithoutSessionInput
 }
@@ -712,6 +793,7 @@ export type SessionUpdateWithoutRunsInput = {
   endedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   workingCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  hintsGiven?: Prisma.IntFieldUpdateOperationsInput | number
   candidate?: Prisma.CandidateUpdateOneRequiredWithoutSessionsNestedInput
   problem?: Prisma.ProblemUpdateOneRequiredWithoutSessionsNestedInput
   messages?: Prisma.MessageUpdateManyWithoutSessionNestedInput
@@ -727,6 +809,7 @@ export type SessionUncheckedUpdateWithoutRunsInput = {
   endedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   workingCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  hintsGiven?: Prisma.IntFieldUpdateOperationsInput | number
   messages?: Prisma.MessageUncheckedUpdateManyWithoutSessionNestedInput
   summary?: Prisma.PerformanceSummaryUncheckedUpdateOneWithoutSessionNestedInput
 }
@@ -738,6 +821,7 @@ export type SessionCreateWithoutMessagesInput = {
   endedAt?: Date | string | null
   workingCode?: string | null
   lastActivityAt?: Date | string | null
+  hintsGiven?: number
   candidate: Prisma.CandidateCreateNestedOneWithoutSessionsInput
   problem: Prisma.ProblemCreateNestedOneWithoutSessionsInput
   runs?: Prisma.RunCreateNestedManyWithoutSessionInput
@@ -753,6 +837,7 @@ export type SessionUncheckedCreateWithoutMessagesInput = {
   endedAt?: Date | string | null
   workingCode?: string | null
   lastActivityAt?: Date | string | null
+  hintsGiven?: number
   runs?: Prisma.RunUncheckedCreateNestedManyWithoutSessionInput
   summary?: Prisma.PerformanceSummaryUncheckedCreateNestedOneWithoutSessionInput
 }
@@ -780,6 +865,7 @@ export type SessionUpdateWithoutMessagesInput = {
   endedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   workingCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  hintsGiven?: Prisma.IntFieldUpdateOperationsInput | number
   candidate?: Prisma.CandidateUpdateOneRequiredWithoutSessionsNestedInput
   problem?: Prisma.ProblemUpdateOneRequiredWithoutSessionsNestedInput
   runs?: Prisma.RunUpdateManyWithoutSessionNestedInput
@@ -795,6 +881,7 @@ export type SessionUncheckedUpdateWithoutMessagesInput = {
   endedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   workingCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  hintsGiven?: Prisma.IntFieldUpdateOperationsInput | number
   runs?: Prisma.RunUncheckedUpdateManyWithoutSessionNestedInput
   summary?: Prisma.PerformanceSummaryUncheckedUpdateOneWithoutSessionNestedInput
 }
@@ -806,6 +893,7 @@ export type SessionCreateWithoutSummaryInput = {
   endedAt?: Date | string | null
   workingCode?: string | null
   lastActivityAt?: Date | string | null
+  hintsGiven?: number
   candidate: Prisma.CandidateCreateNestedOneWithoutSessionsInput
   problem: Prisma.ProblemCreateNestedOneWithoutSessionsInput
   runs?: Prisma.RunCreateNestedManyWithoutSessionInput
@@ -821,6 +909,7 @@ export type SessionUncheckedCreateWithoutSummaryInput = {
   endedAt?: Date | string | null
   workingCode?: string | null
   lastActivityAt?: Date | string | null
+  hintsGiven?: number
   runs?: Prisma.RunUncheckedCreateNestedManyWithoutSessionInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutSessionInput
 }
@@ -848,6 +937,7 @@ export type SessionUpdateWithoutSummaryInput = {
   endedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   workingCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  hintsGiven?: Prisma.IntFieldUpdateOperationsInput | number
   candidate?: Prisma.CandidateUpdateOneRequiredWithoutSessionsNestedInput
   problem?: Prisma.ProblemUpdateOneRequiredWithoutSessionsNestedInput
   runs?: Prisma.RunUpdateManyWithoutSessionNestedInput
@@ -863,6 +953,7 @@ export type SessionUncheckedUpdateWithoutSummaryInput = {
   endedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   workingCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  hintsGiven?: Prisma.IntFieldUpdateOperationsInput | number
   runs?: Prisma.RunUncheckedUpdateManyWithoutSessionNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutSessionNestedInput
 }
@@ -875,6 +966,7 @@ export type SessionCreateManyCandidateInput = {
   endedAt?: Date | string | null
   workingCode?: string | null
   lastActivityAt?: Date | string | null
+  hintsGiven?: number
 }
 
 export type SessionUpdateWithoutCandidateInput = {
@@ -884,6 +976,7 @@ export type SessionUpdateWithoutCandidateInput = {
   endedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   workingCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  hintsGiven?: Prisma.IntFieldUpdateOperationsInput | number
   problem?: Prisma.ProblemUpdateOneRequiredWithoutSessionsNestedInput
   runs?: Prisma.RunUpdateManyWithoutSessionNestedInput
   messages?: Prisma.MessageUpdateManyWithoutSessionNestedInput
@@ -898,6 +991,7 @@ export type SessionUncheckedUpdateWithoutCandidateInput = {
   endedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   workingCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  hintsGiven?: Prisma.IntFieldUpdateOperationsInput | number
   runs?: Prisma.RunUncheckedUpdateManyWithoutSessionNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutSessionNestedInput
   summary?: Prisma.PerformanceSummaryUncheckedUpdateOneWithoutSessionNestedInput
@@ -911,6 +1005,7 @@ export type SessionUncheckedUpdateManyWithoutCandidateInput = {
   endedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   workingCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  hintsGiven?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type SessionCreateManyProblemInput = {
@@ -921,6 +1016,7 @@ export type SessionCreateManyProblemInput = {
   endedAt?: Date | string | null
   workingCode?: string | null
   lastActivityAt?: Date | string | null
+  hintsGiven?: number
 }
 
 export type SessionUpdateWithoutProblemInput = {
@@ -930,6 +1026,7 @@ export type SessionUpdateWithoutProblemInput = {
   endedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   workingCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  hintsGiven?: Prisma.IntFieldUpdateOperationsInput | number
   candidate?: Prisma.CandidateUpdateOneRequiredWithoutSessionsNestedInput
   runs?: Prisma.RunUpdateManyWithoutSessionNestedInput
   messages?: Prisma.MessageUpdateManyWithoutSessionNestedInput
@@ -944,6 +1041,7 @@ export type SessionUncheckedUpdateWithoutProblemInput = {
   endedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   workingCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  hintsGiven?: Prisma.IntFieldUpdateOperationsInput | number
   runs?: Prisma.RunUncheckedUpdateManyWithoutSessionNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutSessionNestedInput
   summary?: Prisma.PerformanceSummaryUncheckedUpdateOneWithoutSessionNestedInput
@@ -957,6 +1055,7 @@ export type SessionUncheckedUpdateManyWithoutProblemInput = {
   endedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   workingCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastActivityAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  hintsGiven?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 
@@ -1008,6 +1107,7 @@ export type SessionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   endedAt?: boolean
   workingCode?: boolean
   lastActivityAt?: boolean
+  hintsGiven?: boolean
   candidate?: boolean | Prisma.CandidateDefaultArgs<ExtArgs>
   problem?: boolean | Prisma.ProblemDefaultArgs<ExtArgs>
   runs?: boolean | Prisma.Session$runsArgs<ExtArgs>
@@ -1025,6 +1125,7 @@ export type SessionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   endedAt?: boolean
   workingCode?: boolean
   lastActivityAt?: boolean
+  hintsGiven?: boolean
   candidate?: boolean | Prisma.CandidateDefaultArgs<ExtArgs>
   problem?: boolean | Prisma.ProblemDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["session"]>
@@ -1038,6 +1139,7 @@ export type SessionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   endedAt?: boolean
   workingCode?: boolean
   lastActivityAt?: boolean
+  hintsGiven?: boolean
   candidate?: boolean | Prisma.CandidateDefaultArgs<ExtArgs>
   problem?: boolean | Prisma.ProblemDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["session"]>
@@ -1051,9 +1153,10 @@ export type SessionSelectScalar = {
   endedAt?: boolean
   workingCode?: boolean
   lastActivityAt?: boolean
+  hintsGiven?: boolean
 }
 
-export type SessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "candidateId" | "problemId" | "phase" | "startedAt" | "endedAt" | "workingCode" | "lastActivityAt", ExtArgs["result"]["session"]>
+export type SessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "candidateId" | "problemId" | "phase" | "startedAt" | "endedAt" | "workingCode" | "lastActivityAt" | "hintsGiven", ExtArgs["result"]["session"]>
 export type SessionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   candidate?: boolean | Prisma.CandidateDefaultArgs<ExtArgs>
   problem?: boolean | Prisma.ProblemDefaultArgs<ExtArgs>
@@ -1089,6 +1192,7 @@ export type $SessionPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     endedAt: Date | null
     workingCode: string | null
     lastActivityAt: Date | null
+    hintsGiven: number
   }, ExtArgs["result"]["session"]>
   composites: {}
 }
@@ -1525,6 +1629,7 @@ export interface SessionFieldRefs {
   readonly endedAt: Prisma.FieldRef<"Session", 'DateTime'>
   readonly workingCode: Prisma.FieldRef<"Session", 'String'>
   readonly lastActivityAt: Prisma.FieldRef<"Session", 'DateTime'>
+  readonly hintsGiven: Prisma.FieldRef<"Session", 'Int'>
 }
     
 
