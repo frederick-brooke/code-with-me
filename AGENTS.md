@@ -11,7 +11,7 @@ Next.js 16.3.4 mock live-coding interview app: passwordless Candidate sign-in, a
 | `npm run test`     | Vitest                         |
 | `npm run db:generate` | `prisma generate`          |
 | `npm run db:migrate`  | `prisma migrate deploy` (apply migrations on a deploy) |
-| `npm run assessor:configure` | Creates/updates the `get_session_state` webhook tool on the ElevenLabs agent and attaches it (idempotent; uses env keys, URL from `ASSESSOR_TOOL_BASE_URL` or `APP_URL`) |
+| `npm run assessor:configure` | Creates/updates the `get_session_state` and `set_phase` webhook tools on the ElevenLabs agent and attaches them (idempotent; uses env keys, URL from `ASSESSOR_TOOL_BASE_URL` or `APP_URL`) |
 
 > Caveat: the webhook tool's URL must be reachable from ElevenLabs' servers — never `localhost`. Before running `assessor:configure` for real testing, set `ASSESSOR_TOOL_BASE_URL` to a public HTTPS URL (deployed app or a tunnel like `ngrok http 3000`).
 

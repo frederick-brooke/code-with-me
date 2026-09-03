@@ -4,7 +4,13 @@ export type { Candidate } from "@/lib/auth/types";
 
 export type Difficulty = "easy" | "medium" | "hard";
 
-export type SessionPhase = "introduction" | "solve" | "wrap-up" | "debrief";
+export type SessionPhase =
+  | "introduction"
+  | "clarifying"
+  | "approach"
+  | "implementation"
+  | "wrap-up"
+  | "debrief";
 
 export type Speaker = "candidate" | "assessor";
 

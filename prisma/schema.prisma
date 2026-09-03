@@ -19,7 +19,9 @@ enum Difficulty {
 
 enum SessionPhase {
   introduction
-  solve
+  clarifying
+  approach
+  implementation
   wrap_up
   debrief
 }

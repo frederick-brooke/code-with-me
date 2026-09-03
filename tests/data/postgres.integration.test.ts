@@ -218,7 +218,7 @@ describe.skipIf(!DATABASE_URL)("PostgresDataStore (integration)", () => {
     await engine.recordRun("session-1", { code: "print(1)", passedCount: 1, failedCount: 0 });
     await engine.recordMessage("session-1", { speaker: "candidate", text: "Done." });
     const advanced = await engine.advance("session-1");
-    expect(advanced.phase).toBe("solve");
+    expect(advanced.phase).toBe("clarifying");
     const ended = await engine.end("session-1");
     expect(ended.phase).toBe("debrief");
     expect(ended.endedAt).toBeInstanceOf(Date);

@@ -81,19 +81,97 @@ describe("SessionEngine", () => {
     const engine = new SessionEngine(store);
     await startSession(store);
 
-    let session = await engine.advance("session-1");
-    expect(session.phase).toBe("solve");
-    session = (await store.findSessionById("session-1")) as NonNullable<Awaited<typeof session>>;
-    expect(session.phase).toBe("solve");
+    const order = ["clarifying", "approach", "implementation", "wrap-up", "debrief"];
+    let session: Awaited<ReturnType<typeof engine.advance>> | null = null;
+    for (const phase of order) {
+      session = await engine.advance("session-1");
+      expect(session.phase).toBe(phase);
+      const persisted = await store.findSessionById("session-1");
+      expect(persisted?.phase).toBe(phase);
+    }
 
     session = await engine.advance("session-1");
-    expect(session.phase).toBe("wrap-up");
-    session = await engine.advance("session-1");
     expect(session.phase).toBe("debrief");
     session = await engine.advance("session-1");
     expect(session.phase).toBe("debrief");
-    session = await engine.advance("session-1");
-    expect(session.phase).toBe("debrief");
+  });
+
+  it("moves a Session through the whole five-phase arc with setPhase and records the end on Debrief", async () => {
+    const store = makeStore();
+    const engine = new SessionEngine(store);
+    await startSession(store);
+
+    for (const phase of ["clarifying", "approach", "implementation", "wrap-up"] as const) {
+      const session = await engine.setPhase("session-1", phase);
+      expect(session.phase).toBe(phase);
+      expect(session.endedAt).toBeNull();
+    }
+
+    const ended = await engine.setPhase("session-1", "debrief");
+    expect(ended.phase).toBe("debrief");
+    expect(ended.endedAt).toBeInstanceOf(Date);
+
+    const persisted = await store.findSessionById("session-1");
+    expect(persisted?.phase).toBe("debrief");
+    expect(persisted?.endedAt).not.toBeNull();
+  });
+
+  it("is a no-op when setPhase names the current phase", async () => {
+    const store = makeStore();
+    const engine = new SessionEngine(store);
+    await startSession(store);
+    await engine.setPhase("session-1", "approach");
+
+    const same = await engine.setPhase("session-1", "approach");
+    expect(same.phase).toBe("approach");
+    expect(same.endedAt).toBeNull();
+    expect(await store.findSessionById("session-1")).toEqual(same);
+  });
+
+  it("rejects an unknown phase without changing the current phase", async () => {
+    const store = makeStore();
+    const engine = new SessionEngine(store);
+    await startSession(store);
+    await engine.setPhase("session-1", "approach");
+
+    await expect(engine.setPhase("session-1", "solving")).rejects.toThrow(
+      /Unknown phase: solving; valid phases: introduction, clarifying, approach, implementation, wrap-up, debrief/,
+    );
+
+    const session = await store.findSessionById("session-1");
+    expect(session?.phase).toBe("approach");
+  });
+
+  it("rejects a backward setPhase move, leaving the Session unchanged", async () => {
+    const store = makeStore();
+    const engine = new SessionEngine(store);
+    await startSession(store);
+    await engine.setPhase("session-1", "implementation");
+
+    await expect(engine.setPhase("session-1", "approach")).rejects.toThrow(
+      /Cannot move Session backward from implementation to approach/,
+    );
+
+    const session = await store.findSessionById("session-1");
+    expect(session?.phase).toBe("implementation");
+    expect(session?.endedAt).toBeNull();
+  });
+
+  it("never moves an ended Session back out of Debrief through setPhase", async () => {
+    const store = makeStore();
+    const engine = new SessionEngine(store);
+    await startSession(store);
+    const ended = await engine.end("session-1");
+    expect(ended.phase).toBe("debrief");
+    expect(ended.endedAt).toBeInstanceOf(Date);
+
+    await expect(engine.setPhase("session-1", "approach")).rejects.toThrow(
+      /Cannot move Session backward from debrief to approach/,
+    );
+
+    const persisted = await store.findSessionById("session-1");
+    expect(persisted?.phase).toBe("debrief");
+    expect(persisted?.endedAt).not.toBeNull();
   });
 
   it("lands in Debrief when ending from a mid-Session phase, recording the end time", async () => {
@@ -123,7 +201,14 @@ describe("SessionEngine", () => {
   });
 
   it("orders the phases exactly once from Introduction to Debrief", () => {
-    expect(PHASE_ORDER).toEqual(["introduction", "solve", "wrap-up", "debrief"]);
+    expect(PHASE_ORDER).toEqual([
+      "introduction",
+      "clarifying",
+      "approach",
+      "implementation",
+      "wrap-up",
+      "debrief",
+    ]);
   });
 
   it("returns the seeded starter template as current code before any Run", async () => {
@@ -179,6 +264,7 @@ describe("SessionEngine", () => {
 
     await expect(engine.advance("missing")).rejects.toThrow(/Unknown session: missing/);
     await expect(engine.end("missing")).rejects.toThrow(/Unknown session: missing/);
+    await expect(engine.setPhase("missing", "approach")).rejects.toThrow(/Unknown session: missing/);
     await expect(
       engine.recordRun("missing", { code: "a", passedCount: 0, failedCount: 0 }),
     ).rejects.toThrow(/Unknown session: missing/);

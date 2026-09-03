@@ -20,7 +20,9 @@ export type Difficulty = (typeof Difficulty)[keyof typeof Difficulty]
 
 export const SessionPhase = {
   introduction: 'introduction',
-  solve: 'solve',
+  clarifying: 'clarifying',
+  approach: 'approach',
+  implementation: 'implementation',
   wrap_up: 'wrap_up',
   debrief: 'debrief'
 } as const

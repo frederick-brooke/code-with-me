@@ -1,7 +1,14 @@
 import { randomUUID } from "node:crypto";
 import type { DataStore, Problem, Session, SessionPhase } from "@/lib/data/types";
 
-export const PHASE_ORDER: SessionPhase[] = ["introduction", "solve", "wrap-up", "debrief"];
+export const PHASE_ORDER: SessionPhase[] = [
+  "introduction",
+  "clarifying",
+  "approach",
+  "implementation",
+  "wrap-up",
+  "debrief",
+];
 
 export interface SessionRunInput {
   code: string;
@@ -25,6 +32,21 @@ export interface SessionQuery {
 export interface SavedSessionView {
   session: Session;
   problemTitle: string;
+}
+
+export type SessionEngineFailure =
+  | "unknown-session"
+  | "unknown-phase"
+  | "invalid-transition";
+
+export class SessionEngineError extends Error {
+  constructor(
+    readonly code: SessionEngineFailure,
+    message: string,
+  ) {
+    super(message);
+    this.name = "SessionEngineError";
+  }
 }
 
 export class SessionEngine {
@@ -84,6 +106,37 @@ export class SessionEngine {
     const index = PHASE_ORDER.indexOf(session.phase);
     const next = PHASE_ORDER[Math.min(index + 1, PHASE_ORDER.length - 1)];
     return this.moveTo(sessionId, next);
+  }
+
+  /**
+   * The Assessor's phase-advance tool: sets the Session to a named phase
+   * through the arc (e.g. "approach" once the Candidate has talked through
+   * their approach). The engine stays the single source of truth for phase
+   * state: motion is forward-only (an unknown or backward label is rejected
+   * without touching the current phase, so the tool response can guide the
+   * Assessor to recover), and moving into Debrief records the end time.
+   */
+  async setPhase(sessionId: string, target: string): Promise<Session> {
+    const session = await this.requireActiveSession(sessionId);
+    const phase = PHASE_ORDER.find((known) => known === target);
+    if (!phase) {
+      throw new SessionEngineError(
+        "unknown-phase",
+        `Unknown phase: ${target}; valid phases: ${PHASE_ORDER.join(", ")}`,
+      );
+    }
+    const currentIndex = PHASE_ORDER.indexOf(session.phase);
+    const targetIndex = PHASE_ORDER.indexOf(phase);
+    if (targetIndex < currentIndex) {
+      throw new SessionEngineError(
+        "invalid-transition",
+        `Cannot move Session backward from ${session.phase} to ${phase}`,
+      );
+    }
+    if (phase === session.phase) {
+      return session;
+    }
+    return this.moveTo(sessionId, phase);
   }
 
   /** Ends the Session from any phase, writing the end timestamp and landing in Debrief. */
@@ -150,7 +203,7 @@ export class SessionEngine {
   private async requireActiveSession(sessionId: string): Promise<Session> {
     const session = await this.store.findSessionById(sessionId);
     if (!session) {
-      throw new Error(`Unknown session: ${sessionId}`);
+      throw new SessionEngineError("unknown-session", `Unknown session: ${sessionId}`);
     }
     return session;
   }

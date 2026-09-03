@@ -2,14 +2,47 @@ import "dotenv/config";
 
 const API = "https://api.elevenlabs.io";
 
-const TOOL_NAME = "get_session_state";
-const TOOL_DESCRIPTION =
-  "Returns the Candidate's current code and their latest visible Run pass/fail counts for the active Session. Call it whenever the Candidate asks about their code or progress, before answering.";
-
 interface ToolEntry {
   id: string;
   tool_config: { name?: string; type?: string };
 }
+
+interface WebhookToolSpec {
+  name: string;
+  description: string;
+  path: string;
+  method: "GET" | "POST";
+  requestBodySchema?: Record<string, unknown>;
+}
+
+const TOOLS: WebhookToolSpec[] = [
+  {
+    name: "get_session_state",
+    description:
+      "Returns the Candidate's current code and their latest visible Run pass/fail counts for the active Session. Call it whenever the Candidate asks about their code or progress, before answering.",
+    path: "/api/assessor/session-state/{session_id}",
+    method: "GET",
+  },
+  {
+    name: "set_phase",
+    description:
+      "Advances the live Session to the named phase: introduction, clarifying, approach, implementation, wrap-up or debrief. Move to clarifying once the Candidate's questions are answered, to approach once they have talked through their approach, to implementation when they start coding, and to wrap-up when a Run passes or the Candidate wants to close. The engine stays the source of truth for phase state.",
+    path: "/api/assessor/phase/{session_id}",
+    method: "POST",
+    requestBodySchema: {
+      type: "object",
+      description: "The phase to move the Session to.",
+      properties: {
+        phase: {
+          type: "string",
+          description:
+            "The name of the phase to advance to. One of: introduction, clarifying, approach, implementation, wrap-up, debrief.",
+        },
+      },
+      required: ["phase"],
+    },
+  },
+];
 
 async function apiJson(path: string, init?: RequestInit): Promise<{ ok: boolean; status: number; body: unknown }> {
   const apiKey = process.env.ELEVENLABS_API_KEY;
@@ -36,28 +69,19 @@ function requireEnv(name: string): string {
   return value;
 }
 
-function toolConfigUrl(): string {
+function toolConfigUrl(path: string): string {
   const base = process.env.ASSESSOR_TOOL_BASE_URL ?? process.env.APP_URL ?? "http://localhost:3000";
-  return `${base.replace(/\/$/, "")}/api/assessor/session-state/{session_id}`;
+  return `${base.replace(/\/$/, "")}${path}`;
 }
 
-async function readExistingTool(): Promise<ToolEntry | null> {
-  const { ok, body } = await apiJson("/v1/convai/tools?page_size=100");
-  if (!ok) {
-    throw new Error(`Failed to list tools: HTTP ${(body as { status?: unknown })?.status ?? "?"}`);
-  }
-  const tools = (body as { tools?: ToolEntry[] }).tools ?? [];
-  return tools.find((tool) => tool.tool_config?.name === TOOL_NAME) ?? null;
-}
-
-async function upsertTool(secret: string): Promise<string> {
-  const toolConfig = {
+function buildToolConfig(spec: WebhookToolSpec, secret: string): Record<string, unknown> {
+  return {
     type: "webhook",
-    name: TOOL_NAME,
-    description: TOOL_DESCRIPTION,
+    name: spec.name,
+    description: spec.description,
     api_schema: {
-      url: toolConfigUrl(),
-      method: "GET",
+      url: toolConfigUrl(spec.path),
+      method: spec.method,
       path_params_schema: {
         session_id: {
           type: "string",
@@ -67,11 +91,27 @@ async function upsertTool(secret: string): Promise<string> {
       request_headers: {
         "x-assessor-tool-secret": secret,
       },
+      ...(spec.method === "POST"
+        ? { request_body_schema: spec.requestBodySchema, content_type: "application/json" }
+        : {}),
     },
     response_timeout_secs: 30,
   };
+}
 
-  const existing = await readExistingTool();
+async function readExistingTool(name: string): Promise<ToolEntry | null> {
+  const { ok, body } = await apiJson("/v1/convai/tools?page_size=100");
+  if (!ok) {
+    throw new Error(`Failed to list tools: HTTP ${(body as { status?: unknown })?.status ?? "?"}`);
+  }
+  const tools = (body as { tools?: ToolEntry[] }).tools ?? [];
+  return tools.find((tool) => tool.tool_config?.name === name) ?? null;
+}
+
+async function upsertTool(spec: WebhookToolSpec, secret: string): Promise<string> {
+  const toolConfig = buildToolConfig(spec, secret);
+
+  const existing = await readExistingTool(spec.name);
   if (existing) {
     const result = await apiJson(`/v1/convai/tools/${existing.id}`, {
       method: "PATCH",
@@ -80,7 +120,7 @@ async function upsertTool(secret: string): Promise<string> {
     if (!result.ok) {
       throw new Error(`Failed to update tool: HTTP ${result.status} ${JSON.stringify(result.body)}`);
     }
-    console.log(`Updated existing tool ${TOOL_NAME} (${existing.id})`);
+    console.log(`Updated existing tool ${spec.name} (${existing.id})`);
     return existing.id;
   }
 
@@ -95,11 +135,11 @@ async function upsertTool(secret: string): Promise<string> {
   if (!id) {
     throw new Error(`Created tool but got no id: ${JSON.stringify(result.body)}`);
   }
-  console.log(`Created tool ${TOOL_NAME} (${id})`);
+  console.log(`Created tool ${spec.name} (${id})`);
   return id;
 }
 
-async function attachToolToAgent(agentId: string, toolId: string): Promise<void> {
+async function attachToolsToAgent(agentId: string, toolIds: string[]): Promise<void> {
   const agentResult = await apiJson(`/v1/convai/agents/${agentId}`);
   if (!agentResult.ok) {
     throw new Error(`Failed to read agent: HTTP ${agentResult.status} ${JSON.stringify(agentResult.body)}`);
@@ -114,12 +154,13 @@ async function attachToolToAgent(agentId: string, toolId: string): Promise<void>
   };
   const prompt = agent.conversation_config?.agent?.prompt;
   const existingIds = prompt?.tool_ids ?? [];
-  if (existingIds.includes(toolId)) {
-    console.log(`Agent already has tool ${toolId} attached`);
+  const toolIdsToAdd = toolIds.filter((id) => !existingIds.includes(id));
+  if (toolIdsToAdd.length === 0) {
+    console.log(`Agent already has all tools attached`);
     return;
   }
 
-  const toolIds = [...existingIds, toolId];
+  const newToolIds = [...existingIds, ...toolIdsToAdd];
   const existingPlaceholders =
     agent.conversation_config?.agent?.dynamic_variables?.dynamic_variable_placeholders ?? {};
   const placeholders = {
@@ -134,16 +175,16 @@ async function attachToolToAgent(agentId: string, toolId: string): Promise<void>
     body: JSON.stringify({
       conversation_config: {
         agent: {
-          prompt: { tool_ids: toolIds },
+          prompt: { tool_ids: newToolIds },
           dynamic_variables: { dynamic_variable_placeholders: placeholders },
         },
       },
     }),
   });
   if (!patch.ok) {
-    throw new Error(`Failed to attach tool: HTTP ${patch.status} ${JSON.stringify(patch.body)}`);
+    throw new Error(`Failed to attach tools: HTTP ${patch.status} ${JSON.stringify(patch.body)}`);
   }
-  console.log(`Attached ${toolId} to agent ${agentId} (now ${toolIds.length} tools)`);
+  console.log(`Attached ${toolIdsToAdd.join(", ")} to agent ${agentId} (now ${newToolIds.length} tools)`);
 
   const verify = await apiJson(`/v1/convai/agents/${agentId}`);
   const after = verify.body as {
@@ -152,29 +193,36 @@ async function attachToolToAgent(agentId: string, toolId: string): Promise<void>
     };
   };
   const afterPrompt = after.conversation_config?.agent?.prompt;
-  if (!afterPrompt?.tool_ids?.includes(toolId)) {
-    throw new Error("Verification failed: tool id is not present on the agent after PATCH");
+  if (!afterPrompt || !toolIds.every((id) => afterPrompt.tool_ids?.includes(id))) {
+    throw new Error("Verification failed: tool ids are not present on the agent after PATCH");
   }
   if (typeof afterPrompt.prompt !== "string" || afterPrompt.prompt.length === 0) {
     console.warn("WARNING: the agent's system prompt text appears empty after PATCH; check the agent config.");
   } else {
-    console.log(`Verified: agent has the tool and a system prompt (${afterPrompt.prompt.length} chars)`);
+    console.log(`Verified: agent has all tools and a system prompt (${afterPrompt.prompt.length} chars)`);
   }
 }
 
 const secret = requireEnv("ASSESSOR_TOOL_SECRET");
 const agentId = process.env.ASSESSOR_AGENT_ID ?? requireEnv("ELEVENLABS_AGENT_ID");
 
-const url = toolConfigUrl();
-if (url.startsWith("http://localhost") || url.startsWith("http://127.0.0.1")) {
-  console.warn(
-    `\nWARNING: webhook URL is ${url}.\n` +
-      "ElevenLabs servers cannot reach localhost. For the agent's tool to work,\n" +
-      "set ASSESSOR_TOOL_BASE_URL to a publicly reachable HTTPS URL (e.g. a deployed\n" +
-      "app or an ngrok/cloudflared tunnel), then re-run this script.",
-  );
+for (const tool of TOOLS) {
+  const url = toolConfigUrl(tool.path);
+  if (url.startsWith("http://localhost") || url.startsWith("http://127.0.0.1")) {
+    console.warn(
+      `\nWARNING: webhook URL is ${url}.\n` +
+        "ElevenLabs servers cannot reach localhost. For the agent's tools to work,\n" +
+        "set ASSESSOR_TOOL_BASE_URL to a publicly reachable HTTPS URL (e.g. a deployed\n" +
+        "app or an ngrok/cloudflared tunnel), then re-run this script.",
+    );
+  }
 }
 
-const toolId = await upsertTool(secret);
-await attachToolToAgent(agentId, toolId);
-console.log("\nDone. The get_session_state webhook tool is created/updated and attached to the agent.");
+const toolIds: string[] = [];
+for (const tool of TOOLS) {
+  toolIds.push(await upsertTool(tool, secret));
+}
+await attachToolsToAgent(agentId, toolIds);
+console.log(
+  `\nDone. Webhook tools registered and attached to the agent: ${toolIds.join(", ")}`,
+);

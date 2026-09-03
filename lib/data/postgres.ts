@@ -16,16 +16,23 @@ import type {
   TestCase,
 } from "@/lib/data/types";
 
-const PHASE_TO_PRISMA: Record<SessionPhase, "introduction" | "solve" | "wrap_up" | "debrief"> = {
+const PHASE_TO_PRISMA: Record<
+  SessionPhase,
+  "introduction" | "clarifying" | "approach" | "implementation" | "wrap_up" | "debrief"
+> = {
   introduction: "introduction",
-  solve: "solve",
+  clarifying: "clarifying",
+  approach: "approach",
+  implementation: "implementation",
   "wrap-up": "wrap_up",
   debrief: "debrief",
 };
 
 const PHASE_FROM_PRISMA: Record<string, SessionPhase> = {
   introduction: "introduction",
-  solve: "solve",
+  clarifying: "clarifying",
+  approach: "approach",
+  implementation: "implementation",
   wrap_up: "wrap-up",
   debrief: "debrief",
 };

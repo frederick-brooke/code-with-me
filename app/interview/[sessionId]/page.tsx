@@ -2,11 +2,51 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCachedCurrentCandidate } from "@/lib/auth/session";
 import { getDataStore } from "@/lib/data";
-import { SessionEngine } from "@/lib/engine/session-engine";
+import { PHASE_ORDER, SessionEngine } from "@/lib/engine/session-engine";
+import type { SessionPhase } from "@/lib/data/types";
 import { SignOutButton } from "@/app/components/sign-out-button";
 import { pillButtonClassName } from "@/app/components/pill-button";
 import { SolveSurface } from "@/app/components/solve-surface";
 import { AssessorConversation } from "@/app/components/assessor-conversation";
+
+const PHASE_LABELS: Record<SessionPhase, string> = {
+  introduction: "Introduction",
+  clarifying: "Clarifying",
+  approach: "Approach",
+  implementation: "Implementation",
+  "wrap-up": "Wrap-up",
+  debrief: "Debrief",
+};
+
+function PhaseTrail({ current }: { current: SessionPhase }) {
+  const currentIndex = PHASE_ORDER.indexOf(current);
+  return (
+    <nav aria-label="Interview phases" className="flex flex-wrap items-center gap-2 text-xs">
+      {PHASE_ORDER.map((phase, index) => {
+        const isCurrent = phase === current;
+        const isDone = index < currentIndex;
+        return (
+          <span key={phase} className="flex items-center gap-2">
+            {index > 0 && <span className="text-zinc-300">/</span>}
+            <span
+              aria-current={isCurrent ? "step" : undefined}
+              className={[
+                isCurrent
+                  ? "bg-black text-white dark:bg-white dark:text-black"
+                  : isDone
+                    ? "text-zinc-900 dark:text-zinc-100"
+                    : "text-zinc-400",
+                "rounded-full border border-black/10 px-2.5 py-1 font-medium dark:border-white/15",
+              ].join(" ")}
+            >
+              {PHASE_LABELS[phase]}
+            </span>
+          </span>
+        );
+      })}
+    </nav>
+  );
+}
 
 export default async function InterviewPage({
   params,
@@ -38,9 +78,7 @@ export default async function InterviewPage({
 
         <header className="flex flex-col gap-3">
           <h1 className="text-3xl font-semibold tracking-tight">{problem.title}</h1>
-          <p className="text-sm capitalize text-zinc-500">
-            Phase: {view.session.phase}
-          </p>
+          <PhaseTrail current={view.session.phase} />
         </header>
 
         <section className="rounded-2xl border border-black/[.08] bg-white p-6 dark:border-white/[.145] dark:bg-black">
