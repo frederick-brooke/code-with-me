@@ -26,10 +26,11 @@ Code with Me is a Next.js (App Router) + TypeScript web application that prepare
 
 - **Candidate** — the human preparing for interviews.
 - **Assessor** — the AI voice agent that runs the interview. Managed turn-based voice pipeline (ElevenLabs): STT, agent reasoning, turn-taking, interruption handling, and TTS all run in that managed pipeline; the app supplies context and receives events.
-- **Session** — one complete mock-interview run for a single Problem. Four phases: Introduction, Solve, Wrap-up, Debrief. The candidate can end from any phase (skips straight to Debrief). The candidate initiates the move from Solve to Wrap-up. No time limit; the assessor suggests realistic pacing.
+- **Session** — one complete mock-interview run for a single Problem. The Assessor leads the Session through five phases — Introduction, Clarifying, Approach, Implementation, Wrap-up — ending in Debrief (ADR-0006). The Assessor advances phases through a backend `set_phase` tool; a passing Run is the natural cue to close. The candidate can end from any phase (skips straight to Debrief). No time limit; the assessor suggests realistic pacing.
 - **Conversation** — the live turn-taking voice exchange between Candidate and Assessor, hosted by the managed agent. One live Conversation stays open for the whole Session (MVP).
 - **Problem** — a leetcode-style question: statement, 1–3 sample tests (candidate-visible), a set of hidden tests (shown only as a pass/fail count), difficulty, optional starter template.
-- **Run** — an explicit event where the candidate submits code to the compiler (in-browser, Pyodide). The assessor reacts only to explicit events (Run, a question, a hint request, session end) — never to keystrokes. Every Run executes against the hidden tests.
+- **Run** — an explicit event where the candidate submits code to the compiler (in-browser, Pyodide). The assessor reacts to explicit events and natural silence, and reads the candidate's Working Code snapshots between Runs — never keystroke-by-keystroke. Every Run executes against the hidden tests.
+- **Working Code** — the candidate's in-editor code between Runs, autosaved as a debounced snapshot so the assessor reads where they are without reacting to keystrokes.
 - **Hidden test** — a test only shown as a pass/fail count; never shown to candidate or assessor directly.
 - **Session Record** — the persisted record per Session: problem, final code snapshot, run history, transcript, and Performance Summary.
 - **Performance Summary** — end-of-session written artifact (not spoken) covering what went well, even-better-if, problems, and a technical review.
@@ -51,7 +52,7 @@ Code with Me is a Next.js (App Router) + TypeScript web application that prepare
 ### 3. The Assessor conversation
 
 - Live voice Session via the ElevenLabs managed agent (eleven-agents). Candidate speaks naturally; the managed pipeline hands turn-taking, interruptions, and barge-in.
-- The agent receives static context (Problem statement, starter template) injected as dynamic variables; volatile state (current code, latest Run counts) is fetched live through our **tools** so it never reasons on stale code.
+- The agent receives static context (Problem statement, Candidate-visible sample tests, starter template) injected as dynamic variables; volatile state (current code, latest Run counts, activity) is fetched live through our **tools** — `get_session_state` (read) and `set_phase` (advance the arc) — so it never reasons on stale code.
 - The agent is told the candidate's current code, visible pass/fail counts, and the conversational memory. It never sees hidden-test inputs/expected outputs.
 - Candidate can end the Session at any point (straight to Debrief).
 
@@ -71,7 +72,7 @@ Code with Me is a Next.js (App Router) + TypeScript web application that prepare
 
 - **candidate** — email identity + auth.
 - **problem** — statement, difficulty, starter template, sample tests, hidden tests (inputs + expected).
-- **session** — candidate_id, problem_id, phase, started_at, ended_at.
+- **session** — candidate_id, problem_id, phase, started_at, ended_at, working_code (autosaved snapshot), last_activity_at.
 - **run** — session_id, code snapshot, timestamp, pass/fail count. Every Run is stored in-browser, essentially free — this trajectory is what makes the summary non-generic.
 - **message** — transcript line (speaker, text, timestamp).
 - **summary** — output of the end-of-session call.
@@ -85,6 +86,7 @@ Code with Me is a Next.js (App Router) + TypeScript web application that prepare
 ## ADRs
 
 - **ADR-0001** — Structural guard for the hint policy instead of prompt-only. See `docs/adr/0001-structural-guard-for-hint-policy.md`.
+- **ADR-0006** — The Assessor leads a live five-phase arc over Working Code snapshots. See `docs/adr/0006-live-assessor-arc.md`.
 
 ## Open Questions (future)
 

@@ -38,13 +38,13 @@ A Next.js + TypeScript web app. A **Candidate** signs in by email (passwordless)
 
 **Session engine (the single seam).** The core of the system is a UI-agnostic domain module, the **`SessionEngine`**, that owns one Session's lifecycle and state. Its command surface: start a Session for a Problem, run the Candidate's current code, advance phase, and end the Session. Its query surface exposes the volatile state the Assessor's tools need — the Candidate's current code and the visible pass/fail counts of recent Runs — plus read projections for the UI (current phase, transcript, saved Sessions). The UI, the voice tool endpoints, and the summary generator are all clients of this one seam. No other module owns Session state.
 
-**Phases.** A Session moves through the four agreed phases: Introduction, Solve, Wrap-up, Debrief. The Candidate initiates the Solve → Wrap-up transition; the Candidate may end from any phase, which jumps straight to Debrief.
+**Phases.** The Assessor leads the Session through five live phases — Introduction, Clarifying, Approach, Implementation, Wrap-up — ending in Debrief (ADR-0006). Failing Runs keep the Session in Implementation; a passing Run is the natural cue for the Assessor to close. The Assessor advances phases through a backend `set_phase` tool; the Candidate may end from any phase, which jumps straight to Debrief.
 
 **Problems.** Persisted in a `problems` table, seeded at setup from a hard-coded seed set. Each Problem: statement, difficulty, optional starter template, 1–3 sample tests (Candidate-visible), and a set of hidden tests (inputs + expected outputs; only a pass/fail count is ever exposed).
 
 **In-browser execution.** Code executes client-side using Pyodide. On a Run, the Candidate's code is run against the hidden suite; the Candidate sees only a pass/fail count. The Assessor sees exactly the same count — never the hidden expectations.
 
-**The Assessor conversation.** The voice agent is an ElevenLabs managed agent; STT, LLM reasoning, turn-taking, interruption handling, and TTS all run inside the managed pipeline. One live Conversation is held open for the whole Session (no tear-down/resume in the MVP). Static context (Problem statement, starter template) is injected as dynamic variables; volatile state (current code, Run results) is fetched live through backend **tools** the agent calls (`get_session_state`), so the agent never reasons on stale code.
+**The Assessor conversation.** The voice agent is an ElevenLabs managed agent; STT, LLM reasoning, turn-taking, interruption handling, and TTS all run inside the managed pipeline. One live Conversation is held open for the whole Session (no tear-down/resume in the MVP). Static context (Problem statement, Candidate-visible sample tests, starter template) is injected as dynamic variables; volatile state (current code, Working Code snapshot, Run results, activity) is fetched live through backend **tools** the agent calls — `get_session_state` to read, `set_phase` to advance the arc — so the agent never reasons on stale code.
 
 **Structural guard for hints (ADR-0001).** The hint policy is enforced structurally: Candidate requests that smell like "give me the answer" are routed to a backend guard tool that returns hint-tiered guidance without revealing a solution. The agent's system prompt is a fallback layer, not the primary guarantee. Tightening the rule is a backend deploy, not a platform reconfiguration.
 
@@ -54,7 +54,7 @@ A Next.js + TypeScript web app. A **Candidate** signs in by email (passwordless)
 
 - `candidate` — email identity + auth (passwordless magic-link / OTP; no password store, no SSO)
 - `problem` — statement, difficulty, starter template, sample tests, hidden tests
-- `session` — candidate, problem, phase, started_at, ended_at
+- `session` — candidate, problem, phase, started_at, ended_at, working_code (autosaved snapshot), last_activity_at
 - `run` — session, code snapshot, pass/fail count, timestamp. **Every** Run is stored, not just the last — the trajectory is what makes the summary non-generic.
 - `message` — transcript line (speaker, text, timestamp)
 - `summary` — the generated Performance Summary for a Session
