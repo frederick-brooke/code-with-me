@@ -29,6 +29,15 @@ function formatDate(date: Date): string {
   }).format(date);
 }
 
+/** A short excerpt of the summary: the first sentence, truncated. */
+function summaryExcerpt(content: string): string {
+  const firstSentence = content.split(/\.\s+|\n+/)[0]?.trim() ?? "";
+  if (firstSentence.length <= 140) {
+    return firstSentence;
+  }
+  return `${firstSentence.slice(0, 137)}…`;
+}
+
 export default async function Home({
   searchParams,
 }: {
@@ -142,25 +151,38 @@ export default async function Home({
           <section aria-label="Past sessions" className="flex flex-col gap-4">
             <h2 className="text-xl font-semibold tracking-tight">Past Sessions</h2>
             <ul className="flex flex-col gap-2">
-              {sessions.map(({ session, problemTitle }) => (
-                <li
-                  key={session.id}
-                  className="rounded-2xl border border-black/[.08] bg-white dark:border-white/[.145] dark:bg-black"
-                >
-                  <Link
-                    href={`/interview/${session.id}`}
-                    className="flex items-center justify-between gap-4 px-6 py-4 text-sm"
+              {sessions.map(({ session, problemTitle, summary }) => {
+                const target =
+                  session.phase === "debrief"
+                    ? `/session/${session.id}`
+                    : `/interview/${session.id}`;
+                return (
+                  <li
+                    key={session.id}
+                    className="rounded-2xl border border-black/[.08] bg-white dark:border-white/[.145] dark:bg-black"
                   >
-                    <span className="flex flex-col">
-                      <span className="font-medium">{problemTitle}</span>
-                      <span className="text-zinc-500 capitalize">{session.phase}</span>
-                    </span>
-                    <span className="text-xs text-zinc-500">
-                      {formatDate(session.startedAt)}
-                    </span>
-                  </Link>
-                </li>
-              ))}
+                    <Link
+                      href={target}
+                      className="flex items-center justify-between gap-4 px-6 py-4 text-sm"
+                    >
+                      <span className="flex flex-col gap-1">
+                        <span className="font-medium">{problemTitle}</span>
+                        <span className="text-zinc-500 capitalize">{session.phase}</span>
+                      </span>
+                      <span className="flex flex-col items-end gap-1">
+                        {summary && (
+                          <span className="max-w-xs truncate text-xs text-zinc-500">
+                            {summaryExcerpt(summary.content)}
+                          </span>
+                        )}
+                        <span className="text-xs text-zinc-500">
+                          {formatDate(session.startedAt)}
+                        </span>
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </section>
         )}

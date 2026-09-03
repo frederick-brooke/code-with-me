@@ -361,6 +361,65 @@ describe("SessionEngine", () => {
   });
 });
 
+describe("SessionEngine getSessionRecord", () => {
+  it("assembles the full Session Record: problem, runs, messages and current code", async () => {
+    const store = makeStore();
+    const engine = new SessionEngine(store);
+    await engine.start("session-1", "candidate-1", "two-sum");
+    await engine.recordRun("session-1", { code: "x = 1", passedCount: 1, failedCount: 3 });
+    await engine.recordMessage("session-1", { speaker: "assessor", text: "Begin." });
+
+    const record = await engine.getSessionRecord("session-1");
+    expect(record?.session.problemId).toBe("two-sum");
+    expect(record?.problem?.title).toBe("Two Sum");
+    expect(record?.runs).toHaveLength(1);
+    expect(record?.runs[0]).toMatchObject({ code: "x = 1", passedCount: 1, failedCount: 3 });
+    expect(record?.messages).toHaveLength(1);
+    expect(record?.messages[0].text).toBe("Begin.");
+  });
+
+  it("resolves currentCode with the same precedence as the query surface", async () => {
+    const store = makeStore();
+    const engine = new SessionEngine(store);
+    await engine.start("session-1", "candidate-1", "two-sum");
+    await engine.recordRun("session-1", { code: "from run", passedCount: 0, failedCount: 4 });
+    await engine.saveWorkingCode("session-1", "from working");
+
+    const record = await engine.getSessionRecord("session-1");
+    expect(record?.currentCode).toBe("from working");
+
+    const bare = await engine.getSessionRecord("session-1");
+    expect(bare?.currentCode).toBe("from working");
+  });
+
+  it("returns null for an unknown Session", async () => {
+    const engine = new SessionEngine(makeStore());
+    expect(await engine.getSessionRecord("missing")).toBeNull();
+  });
+});
+
+describe("SessionEngine listSessionsForCandidate summary", () => {
+  it("includes each saved Session's Performance Summary once one exists", async () => {
+    const store = makeStore();
+    const engine = new SessionEngine(store);
+    await engine.start("session-1", "candidate-1", "two-sum");
+    await engine.end("session-1");
+    await store.createPerformanceSummary({
+      id: "summary-1",
+      sessionId: "session-1",
+      content: "## What went well",
+      createdAt: new Date(),
+    });
+
+    await engine.start("session-2", "candidate-1", "valid-parentheses");
+    const saved = await engine.listSessionsForCandidate("candidate-1");
+
+    const byId = new Map(saved.map((s) => [s.session.id, s]));
+    expect(byId.get("session-1")?.summary?.content).toBe("## What went well");
+    expect(byId.get("session-2")?.summary).toBeNull();
+  });
+});
+
 describe("SessionEngine recordHint", () => {
   it("starts a Session with no hints given", async () => {
     const store = makeSeededStore();

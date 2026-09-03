@@ -18,6 +18,7 @@ Copy `.env.example` to `.env` and fill in what you need. All variables are optio
 - `EMAIL_API_KEY` / `EMAIL_FROM` — Resend transactional email. When unset, login codes are shown on screen instead of emailed.
 - `ELEVENLABS_API_KEY` / `ELEVENLABS_AGENT_ID` — the managed Assessor voice agent. When unset, the interview page shows the Assessor panel as not-configured.
 - `ASSESSOR_TOOL_SECRET` / `ASSESSOR_TOOL_BASE_URL` — the webhook-tool shared secret and its public base URL; see `npm run assessor:configure`.
+- `SUMMARY_LLM_BASE_URL` / `SUMMARY_LLM_API_KEY` / `SUMMARY_LLM_MODEL` — the dedicated Performance Summary LLM call (ADR-0007). An OpenAI-compatible `chat/completions` endpoint; point it at the same provider/model as the ElevenLabs agent so the summary comes from "the same LLM". When the API key is unset, ending a Session still works but no summary is generated.
 
 Run the database migrations against a configured `DATABASE_URL` with:
 

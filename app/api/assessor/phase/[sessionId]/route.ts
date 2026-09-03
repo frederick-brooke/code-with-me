@@ -1,6 +1,7 @@
 import { authorizeAssessorToolRequest } from "@/lib/assessor/config";
 import { getDataStore } from "@/lib/data";
 import { PHASE_ORDER, SessionEngine, SessionEngineError } from "@/lib/engine/session-engine";
+import { debriefSession } from "@/lib/summary/debrief";
 
 export const runtime = "nodejs";
 
@@ -15,7 +16,9 @@ function unknownPhaseBody(message: string): { error: string; valid_phases: strin
  * bearer of the configured shared secret may invoke it. The engine stays the
  * source of truth for phase state: an unknown or backward label is rejected
  * with the valid phases so the Assessor can recover, and the Session is left
- * exactly as it was — never corrupted.
+ * exactly as it was — never corrupted. Moving into Debrief also produces the
+ * Performance Summary (ADR-0007), failure-soft so the phase move is never
+ * blocked by the summary call.
  */
 export async function POST(
   request: Request,
@@ -40,9 +43,13 @@ export async function POST(
     );
   }
 
-  const engine = new SessionEngine(await getDataStore());
+  const store = await getDataStore();
+  const engine = new SessionEngine(store);
   try {
     const session = await engine.setPhase(sessionId, phase.trim());
+    if (session.phase === "debrief") {
+      await debriefSession(store, sessionId);
+    }
     return Response.json({ data: { sessionId, phase: session.phase } });
   } catch (error) {
     if (error instanceof SessionEngineError) {

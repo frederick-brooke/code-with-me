@@ -68,6 +68,20 @@ export interface PerformanceSummary {
   createdAt: Date;
 }
 
+/**
+ * The persisted record of one Session, assembled by `SessionEngine.getSessionRecord`:
+ * the Problem, the final/Working Code, every Run, and the transcript. The whole
+ * record is what the Performance Summary generator (and the Session history page)
+ * is fed. It structurally excludes hidden-test inputs and expected outputs.
+ */
+export interface SessionRecord {
+  session: Session;
+  problem: Problem | null;
+  runs: Run[];
+  messages: Message[];
+  currentCode: string;
+}
+
 export interface DataStore {
   createCandidate(email: string): Promise<Candidate>;
   findCandidateById(id: string): Promise<Candidate | null>;

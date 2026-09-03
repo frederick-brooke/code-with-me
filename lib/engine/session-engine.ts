@@ -1,8 +1,16 @@
 import { randomUUID } from "node:crypto";
 import { PHASE_ORDER } from "@/lib/data/phases";
-import type { DataStore, Problem, Session, SessionPhase } from "@/lib/data/types";
+import type {
+  DataStore,
+  Problem,
+  PerformanceSummary,
+  Session,
+  SessionPhase,
+  SessionRecord,
+} from "@/lib/data/types";
 
 export { PHASE_ORDER } from "@/lib/data/phases";
+export type { SessionRecord } from "@/lib/data/types";
 
 export interface SessionRunInput {
   code: string;
@@ -29,6 +37,7 @@ export interface SessionQuery {
 export interface SavedSessionView {
   session: Session;
   problemTitle: string;
+  summary: PerformanceSummary | null;
 }
 
 export type SessionEngineFailure =
@@ -193,7 +202,7 @@ export class SessionEngine {
 
   /**
    * Read projection for the UI: the Candidate's saved Sessions, newest
-   * first, joined with the chosen Problem's title.
+   * first, joined with the chosen Problem's title and any Performance Summary.
    */
   async listSessionsForCandidate(candidateId: string): Promise<SavedSessionView[]> {
     const sessions = await this.store.listSessionsByCandidate(candidateId);
@@ -205,6 +214,7 @@ export class SessionEngine {
         session,
         problemTitle:
           (await this.store.findProblemById(session.problemId))?.title ?? session.problemId,
+        summary: await this.store.findPerformanceSummaryBySession(session.id),
       })),
     );
   }
@@ -218,6 +228,25 @@ export class SessionEngine {
       return null;
     }
     return { session, problem: await this.store.findProblemById(session.problemId) };
+  }
+
+  /**
+   * The full Session Record projection: the Problem, every Run, the transcript,
+   * and the Candidate's final/Working Code. This is what the Performance Summary
+   * generator and the Session history page are fed (spec's Session Record). It
+   * deliberately excludes hidden-test inputs and expected outputs.
+   */
+  async getSessionRecord(sessionId: string): Promise<SessionRecord | null> {
+    const session = await this.store.findSessionById(sessionId);
+    if (!session) {
+      return null;
+    }
+    const problem = await this.store.findProblemById(session.problemId);
+    const runs = await this.store.listRunsBySession(sessionId);
+    const messages = await this.store.listMessagesBySession(sessionId);
+    const lastRun = runs.at(-1);
+    const currentCode = session.workingCode ?? lastRun?.code ?? problem?.starterTemplate ?? "";
+    return { session, problem, runs, messages, currentCode };
   }
 
   private async moveTo(sessionId: string, phase: SessionPhase): Promise<Session> {

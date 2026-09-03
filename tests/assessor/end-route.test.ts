@@ -83,4 +83,45 @@ describe("POST /api/assessor/end/[sessionId]", () => {
     });
     expect(response.status).toBe(404);
   });
+
+  it("generates and persists a Performance Summary when the summary LLM is configured", async () => {
+    vi.stubEnv("ASSESSOR_TOOL_SECRET", "secret-123");
+    vi.stubEnv("SUMMARY_LLM_API_KEY", "key-123");
+    vi.stubEnv("SUMMARY_LLM_MODEL", "model-9");
+    const fetchImpl = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          choices: [{ message: { content: "## What went well\nStrong finish." } }],
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      ),
+    ) as unknown as typeof fetch;
+    vi.stubGlobal("fetch", fetchImpl);
+
+    const response = await endSession(makeRequest("secret-123"), {
+      params: Promise.resolve({ sessionId: "session-1" }),
+    });
+    expect(response.status).toBe(200);
+
+    const store = await getDataStore();
+    const persisted = await store.findPerformanceSummaryBySession("session-1");
+    expect(persisted?.content).toContain("What went well");
+    expect(fetchImpl).toHaveBeenCalledOnce();
+  });
+
+  it("still ends the Session cleanly when summary generation fails", async () => {
+    vi.stubEnv("ASSESSOR_TOOL_SECRET", "secret-123");
+    vi.stubEnv("SUMMARY_LLM_API_KEY", "key-123");
+    const fetchImpl = vi.fn().mockResolvedValue(new Response("boom", { status: 500 })) as unknown as typeof fetch;
+    vi.stubGlobal("fetch", fetchImpl);
+
+    const response = await endSession(makeRequest("secret-123"), {
+      params: Promise.resolve({ sessionId: "session-1" }),
+    });
+    expect(response.status).toBe(200);
+
+    const store = await getDataStore();
+    expect(await store.findPerformanceSummaryBySession("session-1")).toBeNull();
+    expect((await store.findSessionById("session-1"))?.phase).toBe("debrief");
+  });
 });
