@@ -15,6 +15,14 @@ const TURN_SETTINGS = { turn_timeout: 12, turn_eagerness: "patient" } as const;
  */
 const MAX_DURATION_SECS = 1800;
 
+/**
+ * The agent's introduction message, spoken as soon as the conversation
+ * connects. The Interview arc's Introduction phase then has the agent read
+ * the problem aloud, so this stays a warm opening without reciting specifics.
+ */
+const FIRST_MESSAGE =
+  "Hi, I'm your interview assessor. Welcome to your mock coding interview — we'll work through one problem together, and I'll guide you without giving the answer away. When you're ready, I'll introduce the problem.";
+
 /** Loads the repo-versioned guiding system prompt applied to the agent. */
 function systemPromptText(): string {
   return readFileSync(new URL("./assessor-system-prompt.md", import.meta.url), "utf8");
@@ -183,6 +191,7 @@ async function attachToolsToAgent(agentId: string, toolIds: string[]): Promise<v
       conversation_config: {
         agent: {
           prompt: { tool_ids: newToolIds, prompt: systemPromptText() },
+          first_message: FIRST_MESSAGE,
           dynamic_variables: { dynamic_variable_placeholders: placeholders },
         },
         turn: TURN_SETTINGS,
@@ -202,21 +211,33 @@ async function attachToolsToAgent(agentId: string, toolIds: string[]): Promise<v
   const verify = await apiJson(`/v1/convai/agents/${agentId}`);
   const after = verify.body as {
     conversation_config?: {
-      agent?: { prompt?: { tool_ids?: string[]; prompt?: string } };
+      agent?: {
+        prompt?: { tool_ids?: string[]; prompt?: string };
+        first_message?: string;
+      };
       turn?: { turn_timeout?: number; turn_eagerness?: string };
       conversation?: { max_duration_seconds?: number };
     };
   };
-  const afterPrompt = after.conversation_config?.agent?.prompt;
+  const afterAgent = after.conversation_config?.agent;
+  const afterPrompt = afterAgent?.prompt;
   const afterTurn = after.conversation_config?.turn;
   const afterConversation = after.conversation_config?.conversation;
   if (!afterPrompt || !toolIds.every((id) => afterPrompt.tool_ids?.includes(id))) {
     throw new Error("Verification failed: tool ids are not present on the agent after PATCH");
   }
-  if (typeof afterPrompt.prompt !== "string" || afterPrompt.prompt.length === 0) {
-    throw new Error("Verification failed: the agent's system prompt text is empty after PATCH");
+  if (afterPrompt.prompt !== systemPromptText()) {
+    throw new Error(
+      "Verification failed: the agent's system prompt does not match the repo-versioned prompt (scripts/assessor-system-prompt.md).",
+    );
   }
-  console.log(`Verified: agent has all tools and a system prompt (${afterPrompt.prompt.length} chars)`);
+  console.log(`Verified: agent has all tools and the repo system prompt (${afterPrompt.prompt.length} chars)`);
+  if (afterAgent?.first_message !== FIRST_MESSAGE) {
+    throw new Error(
+      `Verification failed: first_message is ${JSON.stringify(afterAgent?.first_message)}, expected the scripted introduction message.`,
+    );
+  }
+  console.log(`Verified: agent introduction message is in place`);
   if (
     afterTurn?.turn_timeout !== TURN_SETTINGS.turn_timeout ||
     afterTurn?.turn_eagerness !== TURN_SETTINGS.turn_eagerness
