@@ -7,7 +7,7 @@ Next.js 16.3.4 mock live-coding interview app: passwordless Candidate sign-in, a
 | `npm run dev`      | Dev server on `localhost:3000` |
 | `npm run build`    | `prisma generate && next build` (prebuild hook) |
 | `npm run lint`     | ESLint (flat config)           |
-| `npm run start`    | `next start`                   |
+| `npm run start`    | `next start`; the `prestart` hook auto-runs `assessor:configure` first (skipped when the ElevenLabs env keys are unset) |
 | `npm run test`     | Vitest                         |
 | `npm run db:generate` | `prisma generate`          |
 | `npm run db:migrate`  | `prisma migrate deploy` (apply migrations on a deploy) |

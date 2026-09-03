@@ -9,6 +9,7 @@
     "prebuild": "prisma generate && node scripts/migrate-on-vercel.mts",
     "build": "next build",
     "start": "next start",
+    "prestart": "npm run assessor:configure",
     "assessor:configure": "node scripts/assessor-configure.mts",
     "lint": "eslint",
     "test": "vitest run",

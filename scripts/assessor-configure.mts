@@ -79,14 +79,6 @@ async function apiJson(path: string, init?: RequestInit): Promise<{ ok: boolean;
   return { ok: response.ok, status: response.status, body };
 }
 
-function requireEnv(name: string): string {
-  const value = process.env[name];
-  if (!value) {
-    throw new Error(`${name} is not set in .env`);
-  }
-  return value;
-}
-
 function toolConfigUrl(path: string): string {
   const base = process.env.ASSESSOR_TOOL_BASE_URL ?? process.env.APP_URL ?? "http://localhost:3000";
   return `${base.replace(/\/$/, "")}${path}`;
@@ -240,8 +232,19 @@ async function attachToolsToAgent(agentId: string, toolIds: string[]): Promise<v
   }
 }
 
-const secret = requireEnv("ASSESSOR_TOOL_SECRET");
-const agentId = process.env.ASSESSOR_AGENT_ID ?? requireEnv("ELEVENLABS_AGENT_ID");
+const apiKey = process.env.ELEVENLABS_API_KEY;
+const toolSecret = process.env.ASSESSOR_TOOL_SECRET;
+const configuredAgentId = process.env.ASSESSOR_AGENT_ID ?? process.env.ELEVENLABS_AGENT_ID;
+
+if (!apiKey || !toolSecret || !configuredAgentId) {
+  console.log(
+    "assessor:configure skipped: ELEVENLABS_API_KEY, ASSESSOR_TOOL_SECRET and an agent id are required to configure the Assessor.",
+  );
+  process.exit(0);
+}
+
+const secret = toolSecret;
+const agentId = configuredAgentId;
 
 for (const tool of TOOLS) {
   const url = toolConfigUrl(tool.path);
